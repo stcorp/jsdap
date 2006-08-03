@@ -112,9 +112,17 @@ function ddsparser(s) {
         baseType.type = this.next();
         baseType.name = this.next();
         baseType.dimensions = [];
+        baseType.shape = [];
         while (this.peek() != ';') {
             this.consume('[');
-            baseType.dimensions.push(this.next());
+            var tmp = this.next();
+            if (this.peek() == ']') {
+                baseType.shape.push(tmp);  // unnamed dimension
+            } else {
+                baseType.dimensions.push(tmp); // named dimension
+                this.consume('=');
+                baseType.shape.push(this.next());
+            }
             this.consume(']');
         }
         this.consume(';');
@@ -136,10 +144,12 @@ function ddsparser(s) {
         this.consume('Maps');
         this.consume(':');
         grid.maps = {};
-        while (this.peek() != ';') {
+        while (this.peek() != '}') {
             var map_ = this.parseBaseType();
             grid.maps[map_.name] = map_;
         }
+        this.consume('}');
+        grid.name = this.next();
         this.consume(';');
         
         return grid;
@@ -153,10 +163,12 @@ function ddsparser(s) {
         this.consume('structure');
         this.consume('{');
         
-        while (this.peek() != ';') {
+        while (this.peek() != '}') {
             var declaration = this.parseDeclaration();
             structure[declaration.name] = declaration;
         }
+        this.consume('}');
+        structure.name = this.next();
         this.consume(';');
 
         return structure;
@@ -168,7 +180,17 @@ function ddsparser(s) {
         sequence.attributes = {};
 
         this.consume('sequence');
-        this.consume
+        this.consume('{');
 
+        while (this.peek() != '}') {
+            var declaration = this.parseDeclaration();
+            sequence[declaration.name] = declaration;
+        }
+        this.consume('}');
+        sequence.name = this.next();
+        this.consume(';');
+
+        return sequence;
+    }
 }
 ddsparser.prototype = new parser;
