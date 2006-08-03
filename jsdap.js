@@ -74,8 +74,8 @@ function parser(s, tokens) {
 
 }
 
-function ddsparser(s) {
-    this.stream = tokenize(s, tokens);
+function ddsparser(dds) {
+    this.stream = tokenize(dds, tokens);
 
     this.parse = function() {
         this.consume('dataset');
@@ -111,6 +111,8 @@ function ddsparser(s) {
         var baseType = {};
         baseType.type = this.next();
         baseType.name = this.next();
+        baseType.attributes = {};
+        
         baseType.dimensions = [];
         baseType.shape = [];
         while (this.peek() != ';') {
