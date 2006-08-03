@@ -1,7 +1,21 @@
-// DDS Parser. Test with URL http://comet.opendap.org:8080/opendap/s4/nc/123bears.nc
+Array.prototype.contains = function (item) {
+    for (i = 0, el = this[i]; i < this.length; el = this[++i]) {
+        if (item == el) return true;
+    }
+    return false;
+}
 
-var tokens = [/^([\w.:]+)/,             // ids
-              /^([{};=\[\],])/,         // symbols
+String.prototype.join = function (list) {
+    out = list[0];
+    for (i = 1, el = list[i]; i < list.length; el = list[++i]) {
+        out += this;
+        out += el;
+    }
+    return out;
+}
+
+var tokens = [/^([\w.]+)/,              // ids
+              /^([{};:=\[\],])/,        // symbols
               /^("[\s\S]+?[^\\]")/m,    // quoted strings
               /^(-?\d*(\.\d*)?)/,       // numbers
               /^()[\s\n\r]+/,           // whitespace
@@ -9,13 +23,13 @@ var tokens = [/^([\w.:]+)/,             // ids
              ];
 
 var constructors = ['grid', 'structure', 'sequence'];
-var basetypes = ['float32', 'float64', 'int32', 'int16', 'uint32', 'uint16', 'string', 'url'];
+var baseTypes = ['float32', 'float64', 'int32', 'int16', 'uint32', 'uint16', 'string', 'url'];
 
 function tokenize(s, tokens) {
-    out = [];
+    var out = [];
     while (s) {
         for (i = 0, token = tokens[i]; i < tokens.length; token = tokens[++i]) {
-            m = token.exec(s);
+            var m = token.exec(s);
             if (m) {
                 if (m[0]) out.push(m[0]);
                 s = s.substr(Math.max(m[0].length, 1));  // linefeed has zero length?
@@ -36,7 +50,7 @@ function parser(s, tokens) {
 
     // Pop next token.
     this.next = function() {
-        return this.stream.splice(0, 1);
+        return this.stream.splice(0, 1)[0];
     }
 
     // Consume a token or raise exception.
@@ -51,7 +65,7 @@ function parser(s, tokens) {
 
     // Check if a token from the list is the next one.
     this.check = function(tokens) {
-        next = this.peek();
+        var next = this.peek();
         for (i = 0, token = tokens[i]; i < tokens.length; token = tokens[++i]) {
             if (token.toLowerCase() == next.toLowerCase()) return next;
         }
@@ -67,17 +81,13 @@ function ddsparser(s) {
         this.consume('dataset');
         this.consume('{');
         var dataset = {};
+        dataset.type = 'Dataset';
+        dataset.attributes = {};
 
         // Read variables.
-        while (this.check(constructors + basetypes)) {
-            type = this.peek().toLowerCase();
-            switch ...
-            if (this.stream[0].toLowerCase() == 'grid') {
-                grid = this.parsegrid();
-                dataset[grid.name] = grid;
-            } else {
-                this.next();
-            }
+        while (this.check(constructors.concat(baseTypes))) {
+            var declaration = this.parseDeclaration();
+            dataset[declaration.name] = declaration;
         }
 
         this.consume('}');
@@ -87,11 +97,78 @@ function ddsparser(s) {
         return dataset;
     }
 
-    this.parsegrid = function() {
-        var grid = {};
+    this.parseDeclaration = function () {
+        var type = this.peek().toLowerCase();
+        switch (type) {
+            case 'grid':      return this.parseGrid();
+            case 'structure': return this.parseStructure();
+            case 'sequence':  return this.parseSequence();
+            default:          return this.parseBaseType();
+        }
     }
+
+    this.parseBaseType = function() {
+        var baseType = {};
+        baseType.type = this.next();
+        baseType.name = this.next();
+        baseType.dimensions = [];
+        while (this.peek() != ';') {
+            this.consume('[');
+            baseType.dimensions.push(this.next());
+            this.consume(']');
+        }
+        this.consume(';');
+
+        return baseType;
+    }
+
+    this.parseGrid = function() {
+        var grid = {};
+        grid.type = 'Grid';
+        grid.attributes = {};
+
+        this.consume('grid');
+        this.consume('{');
+        this.consume('Array');
+        this.consume(':');
+        grid.array = this.parseDeclaration();
+
+        this.consume('Maps');
+        this.consume(':');
+        grid.maps = {};
+        while (this.peek() != ';') {
+            var map_ = this.parseBaseType();
+            grid.maps[map_.name] = map_;
+        }
+        this.consume(';');
+        
+        return grid;
+    }
+
+    this.parseStructure = function() {
+        var structure = {};
+        structure.type = 'Structure';
+        structure.attributes = {};
+
+        this.consume('structure');
+        this.consume('{');
+        
+        while (this.peek() != ';') {
+            var declaration = this.parseDeclaration();
+            structure[declaration.name] = declaration;
+        }
+        this.consume(';');
+
+        return structure;
+    }
+
+    this.parseSequence = function() {
+        var sequence = {};
+        sequence.type = 'Sequence';
+        sequence.attributes = {};
+
+        this.consume('sequence');
+        this.consume
+
 }
 ddsparser.prototype = new parser;
-
-var test = new ddsparser(dds);
-document.write(test.parse());
