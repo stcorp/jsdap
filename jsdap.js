@@ -5,6 +5,7 @@ Array.prototype.contains = function (item) {
     return false;
 }
 
+// As you can see, I come from Python. ;-)
 String.prototype.join = function (list) {
     out = list[0];
     for (i = 1, el = list[i]; i < list.length; el = list[++i]) {
@@ -14,16 +15,29 @@ String.prototype.join = function (list) {
     return out;
 }
 
-var tokens = [/^([\w.]+)/,              // ids
-              /^([{};:=\[\],])/,        // symbols
-              /^("[\s\S]+?[^\\]")/m,    // quoted strings
-              /^(-?\d*(\.\d*)?)/,       // numbers
-              /^()[\s\n\r]+/,           // whitespace
-              /^([\s\S]+)/              // capture all if no match
+// Tokens for parsing the DDS and DAS.
+var tokens = [
+              /^"([\s\S]*?[^\\])"/m,            // quoted strings
+              /^([\w.]+)/,                      // ids
+              /^([{};:=\[\],])/,                // symbols
+              /^(-?\d*(\.\d*)?(e(\+|-)\d+)?)/,   // numbers
+              /^()[\s\n\r]+/,                   // whitespace
+              /^([\s\S]+)/                      // capture all if no match
              ];
 
 var constructors = ['grid', 'structure', 'sequence'];
-var baseTypes = ['float32', 'float64', 'int32', 'int16', 'uint32', 'uint16', 'string', 'url'];
+var baseTypes = ['float32', 'float64', 'int32', 'int16', 'uint32', 'uint16', 'byte', 'string', 'url'];
+
+function instanceOf(object, constructorFunction) {
+    while (object != null) {
+        if (object == constructorFunction.prototype) return true;
+        object = object.__proto__;
+    }
+    return false;
+}
+
+function dapType () {
+}
 
 function tokenize(s, tokens) {
     var out = [];
@@ -40,6 +54,12 @@ function tokenize(s, tokens) {
     return out;
 }
 
+/* 
+ * Simple parser implementation. 
+ *
+ * This parser implements some methods that helps when
+ * building the DDS and DAS parser.
+ */
 function parser(s, tokens) {
     this.stream = tokenize(s, tokens);
 
@@ -74,17 +94,71 @@ function parser(s, tokens) {
 
 }
 
+function dasparser(das, dataset) {
+    this.stream = tokenize(das, tokens);
+    this.dataset = dataset;
+
+    this.parse = function() {
+        var target = this.dataset;
+        
+        this.consume('Attributes');
+        this.consume('{');
+        while (this.peek() != '}') {
+            this.parseAttributes(target);
+        }
+        this.consume('}');
+
+        return this.dataset;
+    }
+
+    this.parseAttributes = function(target) {
+        if (target[this.peek()]) {
+            var next = this.next();
+            this.consume('{');
+            this.parseAttributes(target[next]);
+            this.consume('}');
+        } else {
+            while (this.peek() != '}') {
+                this.parseMetadata(target.attributes);
+            }
+        }
+    }
+
+    this.parseMetadata = function(attributes) {
+        var next = this.next();
+        if (this.peek() == '{') {
+            // hmmm... this is metadata
+            var key = next;
+            this.consume('{');
+            var value = {}
+            this.parseMetadata(value);
+            this.consume('}');
+        } else {
+            var key = this.next();
+            var value = [];
+            value.push(this.next());
+            while (this.peek() != ';') {
+                this.consume(',');
+                value.push(this.next());
+            }
+            this.consume(';');
+        }
+        attributes[key] = value;
+    }
+}
+dasparser.prototype = new parser;
+
 function ddsparser(dds) {
     this.stream = tokenize(dds, tokens);
 
     this.parse = function() {
         this.consume('dataset');
         this.consume('{');
-        var dataset = {};
+        var dataset = new dapType;
         dataset.type = 'Dataset';
         dataset.attributes = {};
 
-        // Read variables.
+        // Read variables
         while (this.check(constructors.concat(baseTypes))) {
             var declaration = this.parseDeclaration();
             dataset[declaration.name] = declaration;
@@ -93,6 +167,24 @@ function ddsparser(dds) {
         this.consume('}');
         dataset.name = this.next();
         this.consume(';');
+
+        // Set the ids on the dataset
+        function walk(dapvar) {
+            for (attr in dapvar) {
+                child = dapvar[attr];
+                if (child.type) {
+                    child.id = dapvar.id + '.' + child.name;
+                    if (instanceOf(child, dapType)) walk(child);
+                }
+            }
+        }
+        for (attr in dataset) {
+            dapvar = dataset[attr];
+            if (dapvar.type) {
+                dapvar.id = dapvar.name;
+                if (instanceOf(dapvar, dapType)) walk(dapvar);
+            }
+        }
 
         return dataset;
     }
@@ -108,7 +200,7 @@ function ddsparser(dds) {
     }
 
     this.parseBaseType = function() {
-        var baseType = {};
+        var baseType = new dapType;
         baseType.type = this.next();
         baseType.name = this.next();
         baseType.attributes = {};
@@ -133,7 +225,7 @@ function ddsparser(dds) {
     }
 
     this.parseGrid = function() {
-        var grid = {};
+        var grid = new dapType;
         grid.type = 'Grid';
         grid.attributes = {};
 
@@ -158,7 +250,7 @@ function ddsparser(dds) {
     }
 
     this.parseStructure = function() {
-        var structure = {};
+        var structure = new dapType;
         structure.type = 'Structure';
         structure.attributes = {};
 
@@ -177,7 +269,7 @@ function ddsparser(dds) {
     }
 
     this.parseSequence = function() {
-        var sequence = {};
+        var sequence = new dapType;
         sequence.type = 'Sequence';
         sequence.attributes = {};
 
