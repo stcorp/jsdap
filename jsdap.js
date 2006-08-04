@@ -283,3 +283,10 @@ function ddsparser(dds) {
     }
 }
 ddsparser.prototype = new parser;
+
+function dodsparser(dods) {
+    var index = dods.indexOf('Data:\n') + 'Data:\n'.length;
+    this.dds = dods.substring(0, index);
+    this.dods = dods.substring(index);
+}
+
