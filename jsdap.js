@@ -1,18 +1,13 @@
+// jsdap, a JavaScript DAP client.
+//
+// Copyright (c) 2005 Roberto De Almeida <roberto@dealmeida.net>
+// License: MIT
+
 Array.prototype.contains = function (item) {
     for (i = 0, el = this[i]; i < this.length; el = this[++i]) {
         if (item == el) return true;
     }
     return false;
-}
-
-// As you can see, I come from Python. ;-)
-String.prototype.join = function (list) {
-    out = list[0];
-    for (i = 1, el = list[i]; i < list.length; el = list[++i]) {
-        out += this;
-        out += el;
-    }
-    return out;
 }
 
 // Tokens for parsing the DDS and DAS.
