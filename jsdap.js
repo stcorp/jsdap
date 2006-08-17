@@ -15,7 +15,7 @@ var tokens = [
               /^"([\s\S]*?[^\\])"/m,            // quoted strings
               /^([\w.]+)/,                      // ids
               /^([{};:=\[\],])/,                // symbols
-              /^(-?\d*(\.\d*)?(e(\+|-)\d+)?)/,   // numbers
+              /^(-?\d*(\.\d*)?(e(\+|-)\d+)?)/,  // numbers
               /^()[\s\n\r]+/,                   // whitespace
               /^([\s\S]+)/                      // capture all if no match
              ];
