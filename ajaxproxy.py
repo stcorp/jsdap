@@ -1,7 +1,7 @@
 """AJAX proxy based on paste.proxy.
 
-Allows only for GET requests, but to any host. Necessary for
-cross-domain XHR, unless we're using Greasemonkey.
+Allows requests to any host. Necessary for cross-domain XHR, unless
+we're using Greasemonkey.
 """
 
 __author__ = 'Roberto De Almeida <roberto@dealmeida.net>'
