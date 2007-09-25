@@ -15,6 +15,7 @@ function dapUnpacker(xdrdata, dapvar) {
 
     this.getValue = function() {
         var i = this._pos;
+        var type = this.dapvar.type.toLowerCase();
 
         if (this._buf.substr(i, 4) == END_OF_SEQUENCE) {
             return [];
@@ -27,8 +28,7 @@ function dapUnpacker(xdrdata, dapvar) {
                 mark = this._unpack_uint();
             }
             return out;
-        } else if (this.dapvar.type == 'Structure' || 
-                   this.dapvar.type == 'Dataset') {
+        } else if (type == 'structure' || type == 'dataset') {
             var out = [];
             dapvar = this.dapvar;
             for (child in dapvar) {
@@ -40,7 +40,7 @@ function dapUnpacker(xdrdata, dapvar) {
             }
             this.dapvar = dapvar;
             return out;
-        } else if (this.dapvar.type == 'Grid') {
+        } else if (type == 'grid') {
             var out = [];
             dapvar = this.dapvar;
             
@@ -60,16 +60,65 @@ function dapUnpacker(xdrdata, dapvar) {
 
         var n = 1;
         if (this.dapvar.shape) {
-            n = this.unpack_uint();
-            if (this.dapvar.type.toLowerCase == 'url' || 
-                this.dapvar.type.toLowerCase == 'string') {
-                this.unpack_uint();
+            n = this._unpack_uint();
+            if (type == 'url' || type == 'string') {
+                this._unpack_uint();
             }
         }
-        // XXX
+
+        // Bytes?
+        var out;
+        if (type == 'byte') {
+            out = this._unpack_bytes(n);
+        // String?
+        } else if (type == 'url' || type == 'string') {
+            out = this._unpack_string(n);
+        } else {
+            out = [];
+            for (var i=0; i<n; i++) {
+                switch (type) {
+                    case 'float32': out.push(this._unpack_float32);
+                    case 'float64': out.push(this._unpack_float64);
+                    case 'int'    : out.push(this._unpack_int);
+                    case 'uint'   : out.push(this._unpack_uint);
+                    case 'int16'  : out.push(this._unpack_int16);
+                    case 'uint16' : out.push(this._unpack_uint16);
+                    case 'int32'  : out.push(this._unpack_int32);
+                    case 'uint32' : out.push(this._unpack_uint32);
+                }
+            }
+        }
+
+        if (self.var.shape) {
+            out = reshape(out, self.var.shape);
+        } else {
+            out = out[0];
+        }
+        
+        return out;
     }
 
-    this._unpack_uint() {
+    this._unpack_byte() {
+        var bytes = 1;
+        var signed = false;
+
+        var i = this._pos;
+        this._pos = i+bytes;
+        data = this._buf.substr(i, bytes);
+        return decodeInt(data, bytes, signed);
+    }
+
+    this._unpack_uint16() {
+        var bytes = 2;
+        var signed = false;
+
+        var i = this._pos;
+        this._pos = i+bytes;
+        data = this._buf.substr(i, bytes);
+        return decodeInt(data, bytes, signed);
+    }
+
+    this._unpack_uint32() {
         var bytes = 4;
         var signed = false;
 
@@ -79,7 +128,19 @@ function dapUnpacker(xdrdata, dapvar) {
         return decodeInt(data, bytes, signed);
     }
 
-    this._unpack_int() {
+    this._unpack_uint = this._unpack_uint32;
+
+    this._unpack_int16() {
+        var bytes = 2;
+        var signed = true;
+
+        var i = this._pos;
+        this._pos = i+bytes;
+        data = this._buf.substr(i, bytes);
+        return decodeInt(data, bytes, signed);
+    }
+
+    this._unpack_int32() {
         var bytes = 4;
         var signed = true;
 
@@ -88,6 +149,8 @@ function dapUnpacker(xdrdata, dapvar) {
         data = this._buf.substr(i, bytes);
         return decodeInt(data, bytes, signed);
     }
+
+    this._unpack_int = this._unpack_int32;
 
     this._unpack_float32() {
         var precision = 23;
@@ -99,7 +162,7 @@ function dapUnpacker(xdrdata, dapvar) {
         data = this._buf.substr(i, bytes);
         return decodeFloat(data, precision, exponent);
     }
-}
+ 
     this._unpack_float64() {
         var precision = 52;
         var exponent = 11;
@@ -110,6 +173,49 @@ function dapUnpacker(xdrdata, dapvar) {
         data = this._buf.substr(i, bytes);
         return decodeFloat(data, precision, exponent);
     }
+
+    this._unpack_bytes(n) {
+        var i = this._pos;
+        var out = [];
+        for (var c=0; c<n; c++) {
+            out.push(this._unpack_byte());
+        }
+        var padding = (4 - (n % 4)) % 4;
+        this._pos = i + n + padding;
+        
+        return out
+    }
+
+    this._unpack_string(n) {
+        var out = [];
+        var n, i, j;
+        for (var c=0; c<n; c++) {
+            n = this._unpack_uint();
+            i = this._pos;
+            data = this._buf.substr(i, n);
+
+            padding = (4 - (n % 4)) % 4;
+            this._pos = i + n + padding;
+
+            out.push(data);
+        }
+        
+        return out;
+    }
+}
+
+
+function reshape(array, shape) {
+    if (!shape.length) return array[0];
+    var out = [];
+    var size, start, stop;
+    for (var i=0; i<shape[0]; i++) {
+        size = array.length / shape[0];
+        start = i * size;
+        stop = start + size;
+        out.push(reshape(array.slice(start, stop), shape.slice(1)));
+    }
+    return out;
 }
 
 
@@ -174,3 +280,5 @@ function decodeFloat(data, precisionBits, exponentBits) {
         : (1 + signal * -2) * (exponent || significand ? !exponent ? Math.pow(2, -bias + 1) * significand
         : Math.pow(2, exponent - bias) * (1 + significand) : 0);
 }
+
+
