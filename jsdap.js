@@ -1,27 +1,37 @@
-// jsdap, a JavaScript DAP client.
-//
-// Copyright (c) 2005 Roberto De Almeida <roberto@dealmeida.net>
-// License: MIT
+var atomicTypes = ['byte', 'int', 'uint', 'int16', 'uint16', 'int32', 'uint32', 'float32', 'float64', 'string', 'url', 'alias'];
+var structures = ['Sequence', 'Structure', 'Dataset'];
+
 
 Array.prototype.contains = function (item) {
     for (i = 0, el = this[i]; i < this.length; el = this[++i]) {
         if (item == el) return true;
     }
     return false;
+}   
+
+
+String.prototype.trim = function() {
+    return this.replace(/^\s+|\s+$/g, '');
 }
 
-// Tokens for parsing the DDS and DAS.
-var tokens = [
-              /^"([\s\S]*?[^\\])"/m,            // quoted strings
-              /^([\w.]+)/,                      // ids
-              /^([{};:=\[\],])/,                // symbols
-              /^(-?\d*(\.\d*)?(e(\+|-)\d+)?)/,  // numbers
-              /^()[\s\n\r]+/,                   // whitespace
-              /^([\s\S]+)/                      // capture all if no match
-             ];
+String.prototype.ltrim = function() {
+    return this.replace(/^[\s\n\r\t]+/, '');
+}
 
-var constructors = ['grid', 'structure', 'sequence'];
-var baseTypes = ['float32', 'float64', 'int32', 'int16', 'uint32', 'uint16', 'byte', 'string', 'url'];
+String.prototype.rtrim = function() {
+    return this.replace(/\s+$/, '');
+}
+
+
+function pseudoSafeEval(str) {
+    if (/^[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]*$/.test(str.
+            replace(/\\./g, '@').
+            replace(/"[^"\\\n\r]*"/g, ''))) {
+        return eval('(' + str + ')');
+    }
+    return str;
+}
+
 
 function instanceOf(object, constructorFunction) {
     while (object != null) {
@@ -31,262 +41,309 @@ function instanceOf(object, constructorFunction) {
     return false;
 }
 
-function dapType () {
+
+function dapType(type) {
+    this.type = type;
+    this.attributes = {};
 }
 
-function tokenize(s, tokens) {
-    var out = [];
-    while (s) {
-        for (i = 0, token = tokens[i]; i < tokens.length; token = tokens[++i]) {
-            var m = token.exec(s);
-            if (m) {
-                if (m[0]) out.push(m[0]);
-                s = s.substr(Math.max(m[0].length, 1));  // linefeed has zero length?
-                break;
-            }
-        }
-    }
-    return out;
-}
 
-/* 
- * Simple parser implementation. 
- *
- * This parser implements some methods that helps when
- * building the DDS and DAS parser.
- */
-function parser(s, tokens) {
-    this.stream = tokenize(s, tokens);
+function simpleParser(input) {
+    this.stream = input;
 
-    // Peek next token.
-    this.peek = function() {
-        return this.stream[0];
-    }
-
-    // Pop next token.
-    this.next = function() {
-        return this.stream.splice(0, 1)[0];
-    }
-
-    // Consume a token or raise exception.
-    this.consume = function(token) {
-        var next = this.next();
-        if (token.toLowerCase() == next.toLowerCase()) {
-            return token;
+    this.peek = function(expr) {
+        var regExp = new RegExp('^' + expr, 'i');
+        m = this.stream.match(regExp);
+        if (m) {
+            return m[0];
         } else {
-            throw new Error("Found '" + next + "' (expected '" + token + "')");
+            return '';
         }
     }
 
-    // Check if a token from the list is the next one.
-    this.check = function(tokens) {
-        var next = this.peek();
-        for (i = 0, token = tokens[i]; i < tokens.length; token = tokens[++i]) {
-            if (token.toLowerCase() == next.toLowerCase()) return next;
+    this.consume = function(expr) {
+        var regExp = new RegExp('^' + expr, 'i');
+        m = this.stream.match(regExp);
+        if (m) {
+            this.stream = this.stream.substr(m[0].length).ltrim();
+            return m[0];
+        } else {
+            throw new Error("Unable to parse stream: " + this.stream.substr(0, 10));
         }
-        return false;
     }
-
 }
 
-function dasparser(das, dataset) {
-    this.stream = tokenize(das, tokens);
-    this.dataset = dataset;
 
-    this.parse = function() {
-        var target = this.dataset;
-        
-        this.consume('Attributes');
-        this.consume('{');
-        while (this.peek() != '}') {
-            this.parseAttributes(target);
-        }
-        this.consume('}');
+function ddsParser(dds, url) {
+    this.stream = this.dds = dds;
+    this.url = url;
 
-        return this.dataset;
-    }
+    this._dataset = function() {
+        var dataset = new dapType('Dataset');
 
-    this.parseAttributes = function(target) {
-        if (target[this.peek()]) {
-            var next = this.next();
-            this.consume('{');
-            this.parseAttributes(target[next]);
-            this.consume('}');
-        } else {
-            while (this.peek() != '}') {
-                this.parseMetadata(target.attributes);
-            }
-        }
-    }
-
-    this.parseMetadata = function(attributes) {
-        var next = this.next();
-        if (this.peek() == '{') {
-            // hmmm... this is metadata
-            var key = next;
-            this.consume('{');
-            var value = {}
-            this.parseMetadata(value);
-            this.consume('}');
-        } else {
-            var key = this.next();
-            var value = [];
-            value.push(this.next());
-            while (this.peek() != ';') {
-                this.consume(',');
-                value.push(this.next());
-            }
-            this.consume(';');
-        }
-        attributes[key] = value;
-    }
-}
-dasparser.prototype = new parser;
-
-function ddsparser(dds) {
-    this.stream = tokenize(dds, tokens);
-
-    this.parse = function() {
         this.consume('dataset');
         this.consume('{');
-        var dataset = new dapType;
-        dataset.type = 'Dataset';
-        dataset.attributes = {};
-
-        // Read variables
-        while (this.check(constructors.concat(baseTypes))) {
-            var declaration = this.parseDeclaration();
+        while (!this.peek('}')) {
+            var declaration = this._declaration();
             dataset[declaration.name] = declaration;
         }
-
         this.consume('}');
-        dataset.name = this.next();
+
+        dataset.id = dataset.name = this.consume('[^;]+');
         this.consume(';');
 
-        // Set the ids on the dataset
-        function walk(dapvar) {
+        // Set id.
+        function walk(dapvar, includeParent) {
             for (attr in dapvar) {
                 child = dapvar[attr];
                 if (child.type) {
-                    child.id = dapvar.id + '.' + child.name;
-                    if (instanceOf(child, dapType)) walk(child);
+                    child.id = child.name;
+                    if (includeParent) {
+                        child.id = dapvar.id + '.' + child.id;
+                    }
+                    if (instanceOf(child, dapType)) walk(child, true);
                 }
             }
         }
-        for (attr in dataset) {
-            dapvar = dataset[attr];
-            if (dapvar.type) {
-                dapvar.id = dapvar.name;
-                if (instanceOf(dapvar, dapType)) walk(dapvar);
-            }
-        }
+        walk(dataset, false);
 
         return dataset;
     }
+    this.parse = this._dataset;
 
-    this.parseDeclaration = function () {
-        var type = this.peek().toLowerCase();
+    this._declaration = function() {
+        var type = this.peek('\\w+').toLowerCase();
         switch (type) {
-            case 'grid':      return this.parseGrid();
-            case 'structure': return this.parseStructure();
-            case 'sequence':  return this.parseSequence();
-            default:          return this.parseBaseType();
+            case 'grid'     : return this._grid();
+            case 'structure': return this._structure();
+            case 'sequence' : return this._sequence();
+            default         : return this._base_declaration();
         }
     }
 
-    this.parseBaseType = function() {
-        var baseType = new dapType;
-        baseType.type = this.next();
-        baseType.name = this.next();
-        baseType.attributes = {};
-        
+    this._base_declaration = function() {
+        var baseType = new dapType();
+
+        baseType.type = this.consume('\\w+');
+        baseType.name = this.consume('\\w+');
+
         baseType.dimensions = [];
         baseType.shape = [];
-        while (this.peek() != ';') {
-            this.consume('[');
-            var tmp = this.next();
-            if (this.peek() == ']') {
-                baseType.shape.push(tmp);  // unnamed dimension
-            } else {
-                baseType.dimensions.push(tmp); // named dimension
+        while (!this.peek(';')) {
+            this.consume('\\[');
+            token = this.consume('\\w+');
+            if (this.peek('=')) {
+                baseType.dimensions.push(token);
                 this.consume('=');
-                baseType.shape.push(this.next());
+                token = this.consume('\\d+');
             }
-            this.consume(']');
+            baseType.shape.push(parseInt(token));
+            this.consume('\\]');
         }
         this.consume(';');
 
         return baseType;
     }
 
-    this.parseGrid = function() {
-        var grid = new dapType;
-        grid.type = 'Grid';
-        grid.attributes = {};
+    this._grid = function() {
+        var grid = new dapType('Grid');
 
         this.consume('grid');
         this.consume('{');
-        this.consume('Array');
-        this.consume(':');
-        grid.array = this.parseDeclaration();
 
-        this.consume('Maps');
+        this.consume('array');
+        this.consume(':');
+        grid.array = this._base_declaration();
+
+        this.consume('maps');
         this.consume(':');
         grid.maps = {};
-        while (this.peek() != '}') {
-            var map_ = this.parseBaseType();
+        while (!this.peek('}')) {
+            var map_ = this._base_declaration();
             grid.maps[map_.name] = map_;
         }
         this.consume('}');
-        grid.name = this.next();
+
+        grid.name = this.consume('\\w+');
         this.consume(';');
         
         return grid;
     }
 
-    this.parseStructure = function() {
-        var structure = new dapType;
-        structure.type = 'Structure';
-        structure.attributes = {};
-
-        this.consume('structure');
-        this.consume('{');
-        
-        while (this.peek() != '}') {
-            var declaration = this.parseDeclaration();
-            structure[declaration.name] = declaration;
-        }
-        this.consume('}');
-        structure.name = this.next();
-        this.consume(';');
-
-        return structure;
-    }
-
-    this.parseSequence = function() {
-        var sequence = new dapType;
-        sequence.type = 'Sequence';
-        sequence.attributes = {};
+    this._sequence = function() {
+        var sequence = new DapType('Sequence');
 
         this.consume('sequence');
         this.consume('{');
-
-        while (this.peek() != '}') {
-            var declaration = this.parseDeclaration();
+        while (!this.peek('}')) {
+            var declaration = this._declaration();
             sequence[declaration.name] = declaration;
         }
         this.consume('}');
-        sequence.name = this.next();
+
+        sequence.name = this.consume('\\w+');
         this.consume(';');
 
         return sequence;
     }
-}
-ddsparser.prototype = new parser;
 
-function dodsparser(dods) {
-    var index = dods.indexOf('Data:\n') + 'Data:\n'.length;
-    this.dds = dods.substring(0, index);
-    this.dods = dods.substring(index);
-}
+    this._structure = function() {
+        var structure = new DapType('Structure');
 
+        this.consume('structure');
+        this.consume('{');
+        while (!this.peek('}')) {
+            var declaration = this._declaration();
+            structure[declaration.name] = declaration;
+        }
+        this.consume('}');
+
+        structure.name = this.consume('\\w+');
+        this.consume(';');
+
+        return structure;
+    }
+}
+ddsParser.prototype = new simpleParser;
+
+
+function dasParser(das, dataset) {
+    this.stream = this.das = das;
+    this.dataset = dataset;
+
+    this.parse = function() {
+        this._target = this.dataset;
+
+        this.consume('attributes');
+        this.consume('{');
+        while (!this.peek('}')) {
+            this._attr_container();
+        }
+        this.consume('}');
+
+        return this.dataset;
+    }
+
+    this._attr_container = function() {
+        if (atomicTypes.contains(this.peek('\\w+').toLowerCase())) {
+            this._attribute(this._target.attributes);
+
+            if (this._target.type == 'Grid') {
+                for (map in this._target.maps) {
+                    if (this.dataset[map]) {
+                        var map = this._target.maps[map];
+                        for (name in map.attributes) {
+                            this.dataset[map].attributes[name] = map.attributes[name];
+                        }
+                    }
+                }
+            }                
+        } else {
+            this._container();
+        }
+    }
+
+    this._container = function() {
+        var name = this.consume('[\\w_\\.]+');
+        this.consume('{');
+
+        if (name.indexOf('.') > -1) {
+            var names = name.split('.');
+            var target = this._target;
+            for (var i=0; i<names.length; i++) {
+                this._target = this._target[names[i]];
+            }
+
+            while (!this.peek('}')) {
+                this._attr_container();
+            }
+            this.consume('}');
+
+            this._target = target;
+        } else if ((structures.contains(this._target.type)) && (this._target[name])) {
+            var target = this._target;            
+            this._target = target[name];
+
+            while (!this.peek('}')) {
+                this._attr_container();
+            }
+            this.consume('}');
+
+            this._target = target;
+        } else {
+            this._target.attributes[name] = this._metadata();
+            this.consume('}');
+        }
+    }
+
+    this._metadata = function() {
+        var output = {};
+        while (!this.peek('}')) {
+            if (atomicTypes.contains(this.peek('\\w+').toLowerCase())) {
+                this._attribute(output);                
+            } else {
+                var name = this.consume('\\w+');
+                this.consume('{');
+                output[name] = this._metadata();
+                this.consume('}');
+            }
+        }
+        return output;
+    }
+
+    this._attribute = function(object) {
+        var type = this.consume('\\w+');
+        var name = this.consume('\\w+');
+
+        var values = [];
+        while (!this.peek(';')) {
+            var value = this.consume('".*?[^\\\\]"|[^;,]+');
+
+            if ((type.toLowerCase() == 'string') || 
+                (type.toLowerCase() == 'url')) {
+                value = pseudoSafeEval(value);
+            } else if (type.toLowerCase() == 'alias') {
+                var target, tokens;
+                if (value.match(/^\\./)) {
+                    tokens = value.substring(1).split('.');
+                    target = this.dataset;
+                } else {
+                    tokens = value.split('.');
+                    target = this._target;
+                }
+
+                for (var i=0; i<tokens.length; i++) {
+                    var token = tokens[i];
+                    if (target[token]) {
+                        target = target[token];
+                    } else if (target.array.name == token) {
+                        target = target.array;
+                    } else if (target.maps[token]) {
+                        target = target.maps[token];
+                    } else {
+                        target = target.attributes[token];
+                    }
+                    value = target;
+                }
+            } else {
+                if (value.toLowerCase() == 'nan') {
+                    value = NaN;
+                } else {
+                    value = pseudoSafeEval(value);
+                }
+            }
+            values.push(value);
+            if (this.peek(',')) {
+                this.consume(',');
+            }
+        }
+        this.consume(';');
+
+        if (values.length == 1) {
+            values = values[0];
+        }
+
+        object[name] = values;
+    }
+}
+dasParser.prototype = new simpleParser;
