@@ -20,37 +20,38 @@ function dapUnpacker(xdrdata, dapvar) {
         if (this._buf.substr(i, 4) == END_OF_SEQUENCE) {
             return [];
         } else if (this._buf.substr(i, 4) == START_OF_SEQUENCE) {
-            var mark = this._unpack_uint();
-            var out = [];
-            while (mark != 2768240640) {
-                var tmp = this.getValue();
+            var mark = this._unpack_uint32();
+            var out = [], tmp;
+            //while (mark != 2768240640) {
+            while (mark != 4244635648) {
+                tmp = this.getValue();
                 out.push(tmp);
-                mark = this._unpack_uint();
+                mark = this._unpack_uint32();
             }
             return out;
-        } else if (type == 'structure' || type == 'dataset') {
-            var out = [];
+        } else if (type == 'structure' || type == 'dataset' || type == 'sequence') {
+            var out = [], tmp;
             dapvar = this.dapvar;
             for (child in dapvar) {
-                if (child.type) {
-                    this.var = child;
-                    var tmp = this.getValue();
+                if (dapvar[child].type) {
+                    this.dapvar = dapvar[child];
+                    tmp = this.getValue();
                     out.push(tmp);
                 }
             }
             this.dapvar = dapvar;
             return out;
         } else if (type == 'grid') {
-            var out = [];
+            var out = [], tmp;
             dapvar = this.dapvar;
             
-            this.var = dapvar.array;
-            var tmp = this.getValue();
+            this.dapvar = dapvar.array;
+            tmp = this.getValue();
             out.push(tmp);
 
             for (map in dapvar.maps) {
-                this.var = dapvar.maps[map];
-                var tmp = this.getValue();
+                this.dapvar = dapvar.maps[map];
+                tmp = this.getValue();
                 out.push(tmp);
             }
 
@@ -59,10 +60,10 @@ function dapUnpacker(xdrdata, dapvar) {
         }
 
         var n = 1;
-        if (this.dapvar.shape) {
-            n = this._unpack_uint();
+        if (this.dapvar.shape.length) {
+            n = this._unpack_uint32();
             if (type == 'url' || type == 'string') {
-                this._unpack_uint();
+                this._unpack_uint32();
             }
         }
 
@@ -75,22 +76,24 @@ function dapUnpacker(xdrdata, dapvar) {
             out = this._unpack_string(n);
         } else {
             out = [];
+            var func;
+            switch (type) {
+                case 'float32': func = '_unpack_float32'; break;
+                case 'float64': func = '_unpack_float64'; break;
+                case 'int'    : func = '_unpack_int32'; break;
+                case 'uint'   : func = '_unpack_uint32'; break;
+                case 'int16'  : func = '_unpack_int16'; break;
+                case 'uint16' : func = '_unpack_uint16'; break;
+                case 'int32'  : func = '_unpack_int32'; break;
+                case 'uint32' : func = '_unpack_uint32'; break;
+            }
             for (var i=0; i<n; i++) {
-                switch (type) {
-                    case 'float32': out.push(this._unpack_float32);
-                    case 'float64': out.push(this._unpack_float64);
-                    case 'int'    : out.push(this._unpack_int);
-                    case 'uint'   : out.push(this._unpack_uint);
-                    case 'int16'  : out.push(this._unpack_int16);
-                    case 'uint16' : out.push(this._unpack_uint16);
-                    case 'int32'  : out.push(this._unpack_int32);
-                    case 'uint32' : out.push(this._unpack_uint32);
-                }
+                out.push(this[func]());
             }
         }
 
-        if (self.var.shape) {
-            out = reshape(out, self.var.shape);
+        if (this.dapvar.shape) {
+            out = reshape(out, this.dapvar.shape);
         } else {
             out = out[0];
         }
@@ -98,7 +101,7 @@ function dapUnpacker(xdrdata, dapvar) {
         return out;
     }
 
-    this._unpack_byte() {
+    this._unpack_byte = function() {
         var bytes = 1;
         var signed = false;
 
@@ -108,7 +111,7 @@ function dapUnpacker(xdrdata, dapvar) {
         return decodeInt(data, bytes, signed);
     }
 
-    this._unpack_uint16() {
+    this._unpack_uint16 = function() {
         var bytes = 2;
         var signed = false;
 
@@ -118,7 +121,7 @@ function dapUnpacker(xdrdata, dapvar) {
         return decodeInt(data, bytes, signed);
     }
 
-    this._unpack_uint32() {
+    this._unpack_uint32 = function() {
         var bytes = 4;
         var signed = false;
 
@@ -128,9 +131,7 @@ function dapUnpacker(xdrdata, dapvar) {
         return decodeInt(data, bytes, signed);
     }
 
-    this._unpack_uint = this._unpack_uint32;
-
-    this._unpack_int16() {
+    this._unpack_int16 = function() {
         var bytes = 2;
         var signed = true;
 
@@ -140,7 +141,7 @@ function dapUnpacker(xdrdata, dapvar) {
         return decodeInt(data, bytes, signed);
     }
 
-    this._unpack_int32() {
+    this._unpack_int32 = function() {
         var bytes = 4;
         var signed = true;
 
@@ -150,9 +151,7 @@ function dapUnpacker(xdrdata, dapvar) {
         return decodeInt(data, bytes, signed);
     }
 
-    this._unpack_int = this._unpack_int32;
-
-    this._unpack_float32() {
+    this._unpack_float32 = function() {
         var precision = 23;
         var exponent = 8;
         var bytes = 4;
@@ -163,7 +162,7 @@ function dapUnpacker(xdrdata, dapvar) {
         return decodeFloat(data, precision, exponent);
     }
  
-    this._unpack_float64() {
+    this._unpack_float64 = function() {
         var precision = 52;
         var exponent = 11;
         var bytes = 8;
@@ -174,7 +173,7 @@ function dapUnpacker(xdrdata, dapvar) {
         return decodeFloat(data, precision, exponent);
     }
 
-    this._unpack_bytes(n) {
+    this._unpack_bytes = function(n) {
         var i = this._pos;
         var out = [];
         for (var c=0; c<n; c++) {
@@ -186,11 +185,11 @@ function dapUnpacker(xdrdata, dapvar) {
         return out
     }
 
-    this._unpack_string(n) {
+    this._unpack_string = function(n) {
         var out = [];
         var n, i, j;
         for (var c=0; c<n; c++) {
-            n = this._unpack_uint();
+            n = this._unpack_uint32();
             i = this._pos;
             data = this._buf.substr(i, n);
 
@@ -274,7 +273,7 @@ function decodeFloat(data, precisionBits, exponentBits) {
     do
         for(byteValue = buffer[ ++curByte ], startBit = precisionBits % 8 || 8, mask = 1 << startBit;
             mask >>= 1; (byteValue & mask) && (significand += 1 / divisor), divisor *= 2);
-    while(precisionBits -= startBit);
+    while (precisionBits -= startBit);
 
     return exponent == (bias << 1) + 1 ? significand ? NaN : signal ? -Infinity : +Infinity
         : (1 + signal * -2) * (exponent || significand ? !exponent ? Math.pow(2, -bias + 1) * significand

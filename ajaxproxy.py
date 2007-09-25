@@ -9,25 +9,26 @@ __version__ = '1.0.0'
 __license__ = 'MIT'
 
 import urllib
+import urlparse
 
-from paste.proxy import Proxy
-
-
-def make_ajax_proxy(global_conf, allowed_request_methods=""):
-    from paste.deploy.converters import aslist
-    allowed_request_methods = aslist(allowed_request_methods)
-    return AjaxProxy(allowed_request_methods=allowed_request_methods)
+from paste.proxy import TransparentProxy
 
 
-class AjaxProxy(object):
-    def __init__(self, allowed_request_methods=()):
-        self.allowed_request_methods = allowed_request_methods
-    
-    def __call__(self, environ, start_response):
-        address = environ['PATH_INFO']
-        address = urllib.unquote(address)
-        if address.startswith('/'): address = address[1:]
-        environ['PATH_INFO'] = '/'
+def make_ajax_proxy(global_conf):
+    return AjaxProxy
 
-        p = Proxy(address, allowed_request_methods=self.allowed_request_methods)
-        return p(environ, start_response)
+
+def AjaxProxy(environ, start_response):
+    address = environ['PATH_INFO']
+    address = urllib.unquote(address)
+    if address.startswith('/'): address = address[1:]
+
+    scheme, netloc, path, queries, fragment = urlparse.urlsplit(address)
+    environ['wsgi.url_scheme'] = scheme
+    environ['HTTP_HOST'] = netloc
+    environ['SCRIPT_NAME'] = ''
+    environ['PATH_INFO'] = path
+    environ['QUERY_STRING'] = queries
+
+    p = TransparentProxy()
+    return p(environ, start_response)

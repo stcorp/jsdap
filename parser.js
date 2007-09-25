@@ -74,9 +74,8 @@ function simpleParser(input) {
 }
 
 
-function ddsParser(dds, url) {
+function ddsParser(dds) {
     this.stream = this.dds = dds;
-    this.url = url;
 
     this._dataset = function() {
         var dataset = new dapType('Dataset');
@@ -171,7 +170,7 @@ function ddsParser(dds, url) {
     }
 
     this._sequence = function() {
-        var sequence = new DapType('Sequence');
+        var sequence = new dapType('Sequence');
 
         this.consume('sequence');
         this.consume('{');
@@ -188,7 +187,7 @@ function ddsParser(dds, url) {
     }
 
     this._structure = function() {
-        var structure = new DapType('Structure');
+        var structure = new dapType('Structure');
 
         this.consume('structure');
         this.consume('{');
