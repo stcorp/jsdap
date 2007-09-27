@@ -1,6 +1,4 @@
 function proxyUrl(url, callback) {
-    url =  '/proxy/' + encodeURIComponent(url);
-
     var xml = window.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
     if (xml) {
         xml.open("GET", url, true);
@@ -16,7 +14,10 @@ function proxyUrl(url, callback) {
 }
 
 
-function loadDataset(url, callback) {
+function loadDataset(url, callback, proxy) {
+    // User proxy?
+    if (proxy) url = proxy + encodeURIComponent(url);
+
     // Load DDS.
     proxyUrl(url + '.dds', function(dds) {
         var dataset = new ddsParser(dds).parse();
@@ -30,20 +31,16 @@ function loadDataset(url, callback) {
 }
 
 
-function loadData(url, id, selection, callback) {
-    var dodsUrl = url + '.dods?' + id;
-    if (selection.length) dodsUrl += '&' + selection.join('&');
+function loadData(url, callback, proxy) {
+    // User proxy?
+    if (proxy) url = proxy + encodeURIComponent(url);
 
-    proxyUrl(dodsUrl, function(dods) {
+    proxyUrl(url, function(dods) {
         var tmp = dods.split('\nData:\n');
         var dds = tmp[0];
         var xdrdata = tmp[1];
 
         var dapvar = new ddsParser(dds).parse();
-        id = id.replace(/\[.*?\]/g, '').split('.');
-        for (var i=0; i<id.length; i++) {
-            dapvar = dapvar[id[i]];
-        }
         var data = new dapUnpacker(xdrdata, dapvar).getValue();
         callback(data);
     });
