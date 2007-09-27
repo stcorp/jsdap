@@ -62,7 +62,7 @@ function dapUnpacker(xdrdata, dapvar) {
         var n = 1;
         if (this.dapvar.shape.length) {
             n = this._unpack_uint32();
-            if (type == 'url' || type == 'string') {
+            if (type != 'url' && type != 'string') {
                 this._unpack_uint32();
             }
         }
@@ -112,7 +112,7 @@ function dapUnpacker(xdrdata, dapvar) {
     }
 
     this._unpack_uint16 = function() {
-        var bytes = 2;
+        var bytes = 4;
         var signed = false;
 
         var i = this._pos;
@@ -132,7 +132,7 @@ function dapUnpacker(xdrdata, dapvar) {
     }
 
     this._unpack_int16 = function() {
-        var bytes = 2;
+        var bytes = 4;
         var signed = true;
 
         var i = this._pos;
@@ -173,10 +173,10 @@ function dapUnpacker(xdrdata, dapvar) {
         return decodeFloat(data, precision, exponent);
     }
 
-    this._unpack_bytes = function(n) {
+    this._unpack_bytes = function(count) {
         var i = this._pos;
         var out = [];
-        for (var c=0; c<n; c++) {
+        for (var c=0; c<count; c++) {
             out.push(this._unpack_byte());
         }
         var padding = (4 - (n % 4)) % 4;
@@ -185,10 +185,10 @@ function dapUnpacker(xdrdata, dapvar) {
         return out
     }
 
-    this._unpack_string = function(n) {
+    this._unpack_string = function(count) {
         var out = [];
         var n, i, j;
-        for (var c=0; c<n; c++) {
+        for (var c=0; c<count; c++) {
             n = this._unpack_uint32();
             i = this._pos;
             data = this._buf.substr(i, n);
@@ -232,17 +232,17 @@ function readBits(buffer, start, length) {
         sum = ((buffer[ curByte ] >> offsetRight) & ((1 << (diff ? 8 - offsetRight : length)) - 1))
         + (diff && (offsetLeft = (start + length) % 8) ? (buffer[ lastByte++ ] & ((1 << offsetLeft) - 1))
         << (diff-- << 3) - offsetRight : 0); diff; sum += shl(buffer[ lastByte++ ], (diff-- << 3) - offsetRight));
-
     return sum;
 }
 
 
 function getBuffer(data) {
-    var buffer;
-    for(var l, i = l = data.length, b = buffer = new Array(l); i; b[l - i] = data.charCodeAt(--i));
-    b.reverse();
-
-    return buffer;
+    var b = new Array(data.length);
+    for (var i=0; i<data.length; i++) {
+        b[i] = data.charCodeAt(i) & 0xff;;
+    }
+    if (!b.length) throw new Error("stop!");
+    return b;
 }
 
 
@@ -279,5 +279,3 @@ function decodeFloat(data, precisionBits, exponentBits) {
         : (1 + signal * -2) * (exponent || significand ? !exponent ? Math.pow(2, -bias + 1) * significand
         : Math.pow(2, exponent - bias) * (1 + significand) : 0);
 }
-
-

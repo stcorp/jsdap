@@ -29,6 +29,7 @@ def AjaxProxy(environ, start_response):
     environ['SCRIPT_NAME'] = ''
     environ['PATH_INFO'] = path
     environ['QUERY_STRING'] = queries
+    environ['HTTP_CONTENT_TYPE'] = "application/binary"
 
     p = TransparentProxy()
     return p(environ, start_response)

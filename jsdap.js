@@ -10,8 +10,9 @@ function proxyUrl(url, callback) {
                 callback(xml.responseText);
             }
         }
+        xml.overrideMimeType('text/plain; charset=x-user-defined');
+        xml.send();
     }
-    xml.send();
 }
 
 
