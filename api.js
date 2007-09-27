@@ -7,7 +7,7 @@ function proxyUrl(url, callback) {
             if (xml.readyState == 4) {
                 callback(xml.responseText);
             }
-        }
+        };
         xml.overrideMimeType('text/plain; charset=x-user-defined');
         xml.send();
     }

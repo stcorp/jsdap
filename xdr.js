@@ -98,7 +98,7 @@ function dapUnpacker(xdrdata, dapvar) {
         }
         
         return out;
-    }
+    };
 
     this._unpack_byte = function() {
         var bytes = 1;
@@ -108,7 +108,7 @@ function dapUnpacker(xdrdata, dapvar) {
         this._pos = i+bytes;
         data = this._buf.substr(i, bytes);
         return decodeInt(data, bytes, signed);
-    }
+    };
 
     this._unpack_uint16 = function() {
         var bytes = 4;
@@ -118,7 +118,7 @@ function dapUnpacker(xdrdata, dapvar) {
         this._pos = i+bytes;
         data = this._buf.substr(i, bytes);
         return decodeInt(data, bytes, signed);
-    }
+    };
 
     this._unpack_uint32 = function() {
         var bytes = 4;
@@ -128,7 +128,7 @@ function dapUnpacker(xdrdata, dapvar) {
         this._pos = i+bytes;
         data = this._buf.substr(i, bytes);
         return decodeInt(data, bytes, signed);
-    }
+    };
 
     this._unpack_int16 = function() {
         var bytes = 4;
@@ -138,7 +138,7 @@ function dapUnpacker(xdrdata, dapvar) {
         this._pos = i+bytes;
         data = this._buf.substr(i, bytes);
         return decodeInt(data, bytes, signed);
-    }
+    };
 
     this._unpack_int32 = function() {
         var bytes = 4;
@@ -148,7 +148,7 @@ function dapUnpacker(xdrdata, dapvar) {
         this._pos = i+bytes;
         data = this._buf.substr(i, bytes);
         return decodeInt(data, bytes, signed);
-    }
+    };
 
     this._unpack_float32 = function() {
         var precision = 23;
@@ -159,7 +159,7 @@ function dapUnpacker(xdrdata, dapvar) {
         this._pos = i+bytes;
         data = this._buf.substr(i, bytes);
         return decodeFloat(data, precision, exponent);
-    }
+    };
  
     this._unpack_float64 = function() {
         var precision = 52;
@@ -170,7 +170,7 @@ function dapUnpacker(xdrdata, dapvar) {
         this._pos = i+bytes;
         data = this._buf.substr(i, bytes);
         return decodeFloat(data, precision, exponent);
-    }
+    };
 
     this._unpack_bytes = function(count) {
         var i = this._pos;
@@ -181,8 +181,8 @@ function dapUnpacker(xdrdata, dapvar) {
         var padding = (4 - (n % 4)) % 4;
         this._pos = i + n + padding;
         
-        return out
-    }
+        return out;
+    };
 
     this._unpack_string = function(count) {
         var out = [];
@@ -199,7 +199,7 @@ function dapUnpacker(xdrdata, dapvar) {
         }
         
         return out;
-    }
+    };
 }
 
 
@@ -238,7 +238,7 @@ function readBits(buffer, start, length) {
 function getBuffer(data) {
     var b = new Array(data.length);
     for (var i=0; i<data.length; i++) {
-        b[i] = data.charCodeAt(i) & 0xff;;
+        b[i] = data.charCodeAt(i) & 0xff;
     }
     return b;
 }

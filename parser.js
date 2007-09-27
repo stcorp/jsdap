@@ -7,20 +7,20 @@ Array.prototype.contains = function (item) {
         if (item == el) return true;
     }
     return false;
-}   
+};
 
 
 String.prototype.trim = function() {
     return this.replace(/^\s+|\s+$/g, '');
-}
+};
 
 String.prototype.ltrim = function() {
     return this.replace(/^[\s\n\r\t]+/, '');
-}
+};
 
 String.prototype.rtrim = function() {
     return this.replace(/\s+$/, '');
-}
+};
 
 
 function pseudoSafeEval(str) {
@@ -59,7 +59,7 @@ function simpleParser(input) {
         } else {
             return '';
         }
-    }
+    };
 
     this.consume = function(expr) {
         var regExp = new RegExp('^' + expr, 'i');
@@ -70,7 +70,7 @@ function simpleParser(input) {
         } else {
             throw new Error("Unable to parse stream: " + this.stream.substr(0, 10));
         }
-    }
+    };
 }
 
 
@@ -107,7 +107,7 @@ function ddsParser(dds) {
         walk(dataset, false);
 
         return dataset;
-    }
+    };
     this.parse = this._dataset;
 
     this._declaration = function() {
@@ -118,7 +118,7 @@ function ddsParser(dds) {
             case 'sequence' : return this._sequence();
             default         : return this._base_declaration();
         }
-    }
+    };
 
     this._base_declaration = function() {
         var baseType = new dapType();
@@ -142,7 +142,7 @@ function ddsParser(dds) {
         this.consume(';');
 
         return baseType;
-    }
+    };
 
     this._grid = function() {
         var grid = new dapType('Grid');
@@ -167,7 +167,7 @@ function ddsParser(dds) {
         this.consume(';');
         
         return grid;
-    }
+    };
 
     this._sequence = function() {
         var sequence = new dapType('Sequence');
@@ -184,7 +184,7 @@ function ddsParser(dds) {
         this.consume(';');
 
         return sequence;
-    }
+    };
 
     this._structure = function() {
         var structure = new dapType('Structure');
@@ -201,7 +201,7 @@ function ddsParser(dds) {
         this.consume(';');
 
         return structure;
-    }
+    };
 }
 ddsParser.prototype = new simpleParser;
 
@@ -221,7 +221,7 @@ function dasParser(das, dataset) {
         this.consume('}');
 
         return this.dataset;
-    }
+    };
 
     this._attr_container = function() {
         if (atomicTypes.contains(this.peek('\\w+').toLowerCase())) {
@@ -240,7 +240,7 @@ function dasParser(das, dataset) {
         } else {
             this._container();
         }
-    }
+    };
 
     this._container = function() {
         var name = this.consume('[\\w_\\.]+');
@@ -273,7 +273,7 @@ function dasParser(das, dataset) {
             this._target.attributes[name] = this._metadata();
             this.consume('}');
         }
-    }
+    };
 
     this._metadata = function() {
         var output = {};
@@ -288,7 +288,7 @@ function dasParser(das, dataset) {
             }
         }
         return output;
-    }
+    };
 
     this._attribute = function(object) {
         var type = this.consume('\\w+');
@@ -343,6 +343,6 @@ function dasParser(das, dataset) {
         }
 
         object[name] = values;
-    }
+    };
 }
 dasParser.prototype = new simpleParser;
