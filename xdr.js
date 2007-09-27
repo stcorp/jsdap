@@ -22,8 +22,7 @@ function dapUnpacker(xdrdata, dapvar) {
         } else if (this._buf.substr(i, 4) == START_OF_SEQUENCE) {
             var mark = this._unpack_uint32();
             var out = [], tmp;
-            //while (mark != 2768240640) {
-            while (mark != 4244635648) {
+            while (mark != 2768240640) {
                 tmp = this.getValue();
                 out.push(tmp);
                 mark = this._unpack_uint32();
@@ -241,7 +240,6 @@ function getBuffer(data) {
     for (var i=0; i<data.length; i++) {
         b[i] = data.charCodeAt(i) & 0xff;;
     }
-    if (!b.length) throw new Error("stop!");
     return b;
 }
 
