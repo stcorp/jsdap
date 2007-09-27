@@ -1,7 +1,7 @@
-load("js/writeFile.js");
-load("js/base2.js");
-load("js/Packer.js");
-load("js/Words.js");
+load("pack/js/writeFile.js");
+load("pack/js/base2.js");
+load("pack/js/Packer.js");
+load("pack/js/Words.js");
 
 // arguments
 var inFile = arguments[0];
