@@ -178,8 +178,8 @@ function dapUnpacker(xdrdata, dapvar) {
         for (var c=0; c<count; c++) {
             out.push(this._unpack_byte());
         }
-        var padding = (4 - (n % 4)) % 4;
-        this._pos = i + n + padding;
+        var padding = (4 - (count % 4)) % 4;
+        this._pos = i + count + padding;
         
         return out;
     };
