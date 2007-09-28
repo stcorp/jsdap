@@ -1,0 +1,147 @@
+<html>
+    <head>
+        <style type="text/css">
+            body {
+                font-size: 100%;
+                padding: 0.5em;
+            }
+
+            #map {
+                width: 600px;
+                height: 340px;
+                border: 1px solid black;
+                margin: 0.5em;
+                float: left;
+            }
+
+            #variables {
+                margin: 0.5em;
+                float: left;
+            }
+
+            #timeplot {
+                border: 1px solid black;
+                margin: 0.5em;
+                height: 200px;
+                clear: both;
+            }
+        </style>
+
+        <script type="text/javascript" src="http://static.simile.mit.edu/timeplot/api/1.0/timeplot-api.js"></script>
+        <script type="text/javascript" src="js/OpenLayers-2.4/lib/OpenLayers.js"></script>
+        <script type="text/javascript" src="../jsdap.js"></script>
+
+        <script type="text/javascript">
+            var map, timeplot;
+            var baseurl = "http://dapper.pmel.noaa.gov/dapper/epic/tao_time_series.cdp";
+
+            function onLoad() {
+                // Load map.
+                OpenLayers.ProxyHost = '/proxy/';
+                map = new OpenLayers.Map('map');
+                map.addControl(new OpenLayers.Control.LayerSwitcher());
+
+                var layer = new OpenLayers.Layer.WMS('OpenLayers WMS',
+                        'http://labs.metacarta.com/wms/vmap0', {layers: 'basic'});
+                map.addLayer(layer);
+                map.setCenter(new OpenLayers.LonLat(-160, 0), 4);
+
+                var buoys = new OpenLayers.Layer.Markers('TAO array');
+                map.addLayer(buoys);
+
+                // Add buoys. Apparently dapper always returns the data
+                //  in the order lon/lat/_id, independently of the projection.
+                var url = baseurl + ".dods?location.lon,location.lat,location._id";
+                loadData(url, function(data) {
+                    var seqData = data[0];
+                    var station, lon, lat, _id;
+                    for (var i=0; i<seqData.length; i++) {
+                        station = seqData[i];
+                        lon = station[0] - 360.0;
+                        lat = station[1];
+                        _id = station[2];
+                        
+                        var marker = new OpenLayers.Marker(new OpenLayers.LonLat(lon,lat));
+                        marker.metadata = {id: _id, lat: lat, lon: lon};
+                        marker.events.register('click', marker, toggleBuoy);
+                        buoys.addMarker(marker);
+                    }
+                }, '/proxy/');
+
+                loadDataset(baseurl, function(dataset) {
+                    var series = dataset.location.time_series;
+
+                    var html = '<p>Select one or more variables:</p><p>';
+                    var name, id;
+                    for (child in series) {
+                        if (series[child].attributes) {
+                            name = series[child].attributes.long_name;
+                            id = series[child].id;
+                            html += '<input class="variable" type="checkbox" name="' + id + '" id="' + id + '" value="' + id + '" /><label for="' + id + '">&nbsp;' + name + '</label><br>';
+                        }
+                    }
+                    html += '</p><p><input type="button" onclick="plotData()" value="Plot" /></p>';
+
+                    var div = document.getElementById('variables');
+                    div.innerHTML = html;
+                }, '/proxy/');
+
+                // Load timeplot.
+                var plotInfo = [
+                    Timeplot.createPlotInfo({
+                        id: "plot1"
+                    })
+                ];
+                timeplot = Timeplot.create(document.getElementById('timeplot'), plotInfo);
+            }
+
+            function plotData() {
+                var url = baseurl + '.dods?';
+                var vars = document.getElementsByTagName('input');
+                var selected = 0;
+                for (var i=0; i<vars.length; i++) {
+                    if ((vars[i].checked) && (vars[i].className == 'variable')) {
+                        url += vars[i].id + ',';
+                        selected++;
+                    }
+                }
+                if (!selected) return;
+
+                url = url.replace(/,$/, '');
+                url += '&location.time>1.185e12';
+                console.log(url);
+                //loadData(url, function(data) {
+                //    console.log(data);
+                //}, '/proxy/');
+            }
+
+            var resizeTimerID = null;
+            function onResize() {
+                if (resizeTimerID == null) {
+                    resizeTimerID = window.setTimeout(function() {
+                        resizeTimerID = null;
+                        timeplot.repaint();
+                    }, 100);
+                }
+            }
+
+            function toggleBuoy(e) {
+            }
+
+            function decToDeg(dec, axis) {
+                var deg = parseInt(dec);
+                var min = parseInt((dec - deg) * 60);
+                var sec = parseInt(((dec - deg) * 60 - min) * 60);
+                var index = deg > 0 ? axis[0] : axis[1];
+                var minPad = Math.abs(min) < 10 ? '0' : '';
+                var secPad = Math.abs(sec) < 10 ? '0' : '';
+                return Math.abs(deg) + '&deg;' + index + ' ' + minPad + Math.abs(min) + "'" + ' ' + secPad + Math.abs(sec) + '"';
+            }
+        </script>
+    </head>
+    <body onload="onLoad();" onresize="onResize();">
+        <div id="map"></div>
+        <div id="variables"></div>
+        <div id="timeplot"></div>
+    </body>
+</html>

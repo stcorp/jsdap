@@ -71,7 +71,7 @@ function dapUnpacker(xdrdata, dapvar) {
             var mark = this._unpack_uint32();
             var out = [], tmp;
             while (mark != 2768240640) {
-                tmp = this.getValue()
+                tmp = this.getValue();
                 out.push(tmp);
                 mark = this._unpack_uint32();
             }
