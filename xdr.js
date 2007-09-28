@@ -17,18 +17,7 @@ function dapUnpacker(xdrdata, dapvar) {
         var i = this._pos;
         var type = this.dapvar.type.toLowerCase();
 
-        if (this._buf.substr(i, 4) == END_OF_SEQUENCE) {
-            return [];
-        } else if (this._buf.substr(i, 4) == START_OF_SEQUENCE) {
-            var mark = this._unpack_uint32();
-            var out = [], tmp;
-            while (mark != 2768240640) {
-                tmp = this.getValue();
-                out.push(tmp);
-                mark = this._unpack_uint32();
-            }
-            return out;
-        } else if (type == 'structure' || type == 'dataset' || type == 'sequence') {
+        if (type == 'structure' || type == 'dataset') {
             var out = [], tmp;
             dapvar = this.dapvar;
             for (child in dapvar) {
@@ -40,6 +29,7 @@ function dapUnpacker(xdrdata, dapvar) {
             }
             this.dapvar = dapvar;
             return out;
+
         } else if (type == 'grid') {
             var out = [], tmp;
             dapvar = this.dapvar;
@@ -54,6 +44,25 @@ function dapUnpacker(xdrdata, dapvar) {
                 out.push(tmp);
             }
 
+            this.dapvar = dapvar;
+            return out;
+
+        } else if (type == 'sequence') {
+            var mark = this._unpack_uint32();
+            var out = [], struct, tmp;
+            dapvar = this.dapvar;
+            while (mark != 2768240640) {
+                struct = [];
+                for (child in dapvar) {
+                    if (dapvar[child].type) {
+                        this.dapvar = dapvar[child];
+                        tmp = this.getValue();
+                        struct.push(tmp);
+                    }
+                }
+                out.push(struct);
+                mark = this._unpack_uint32();
+            }
             this.dapvar = dapvar;
             return out;
         }
