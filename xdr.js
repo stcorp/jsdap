@@ -65,6 +65,17 @@ function dapUnpacker(xdrdata, dapvar) {
             }
             this.dapvar = dapvar;
             return out;
+        // This is a request for a base type variable inside a
+        // sequence.
+        } else if (this._buf.substr(i, 4) == START_OF_SEQUENCE) {
+            var mark = this._unpack_uint32();
+            var out = [], tmp;
+            while (mark != 2768240640) {
+                tmp = this.getValue()
+                out.push(tmp);
+                mark = this._unpack_uint32();
+            }
+            return out;
         }
 
         var n = 1;
