@@ -18,7 +18,10 @@ def make_ajax_proxy(global_conf):
     return AjaxProxy
 
 
+@memoize()
 def AjaxProxy(environ, start_response):
+    proxy = TransparentProxy()
+
     address = environ['PATH_INFO']
     address = urllib.unquote(address)
     if address.startswith('/'): address = address[1:]
@@ -29,7 +32,5 @@ def AjaxProxy(environ, start_response):
     environ['SCRIPT_NAME'] = ''
     environ['PATH_INFO'] = path
     environ['QUERY_STRING'] = queries
-    environ['HTTP_CONTENT_TYPE'] = "application/binary"
 
-    p = TransparentProxy()
-    return p(environ, start_response)
+    return proxy(environ, start_response)

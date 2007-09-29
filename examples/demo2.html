@@ -7,32 +7,26 @@
             }
 
             #map {
-                width: 600px;
                 height: 340px;
                 border: 1px solid black;
-                margin: 0.5em;
-                float: left;
             }
 
             #variables {
-                margin: 0.5em;
-                float: left;
             }
 
             #timeplot {
                 border: 1px solid black;
-                margin: 0.5em;
                 height: 200px;
-                clear: both;
             }
         </style>
 
         <script type="text/javascript" src="http://static.simile.mit.edu/timeplot/api/1.0/timeplot-api.js"></script>
-        <script type="text/javascript" src="js/OpenLayers-2.4/lib/OpenLayers.js"></script>
+        <script type="text/javascript" src="js/OpenLayers/lib/OpenLayers.js"></script>
         <script type="text/javascript" src="../jsdap.js"></script>
 
         <script type="text/javascript">
-            var map, timeplot;
+            var map, timeplot, eventSource;
+            var activeBuoy;
             var baseurl = "http://dapper.pmel.noaa.gov/dapper/epic/tao_time_series.cdp";
 
             function onLoad() {
@@ -42,14 +36,17 @@
                 map.addControl(new OpenLayers.Control.LayerSwitcher());
 
                 var layer = new OpenLayers.Layer.WMS('OpenLayers WMS',
-                        'http://labs.metacarta.com/wms/vmap0', {layers: 'basic'});
+                        'http://labs.metacarta.com/wms/vmap0',
+                        {layers: 'basic'}, 
+                        {wrapDateLine: true});
                 map.addLayer(layer);
-                map.setCenter(new OpenLayers.LonLat(-160, 0), 4);
+                map.setCenter(new OpenLayers.LonLat(-145, 0), 3);
 
+                // Add layer for the buoys.
                 var buoys = new OpenLayers.Layer.Markers('TAO array');
                 map.addLayer(buoys);
 
-                // Add buoys. Apparently dapper always returns the data
+                // Add buoys. Apparently, dapper always returns the data
                 //  in the order lon/lat/_id, independently of the projection.
                 var url = baseurl + ".dods?location.lon,location.lat,location._id";
                 loadData(url, function(data) {
@@ -87,6 +84,7 @@
                 }, '/proxy/');
 
                 // Load timeplot.
+                eventSource = new Timeplot.DefaultEventSource();
                 var plotInfo = [
                     Timeplot.createPlotInfo({
                         id: "plot1"
@@ -108,11 +106,14 @@
                 if (!selected) return;
 
                 url = url.replace(/,$/, '');
-                url += '&location.time>1.185e12';
-                console.log(url);
-                //loadData(url, function(data) {
-                //    console.log(data);
-                //}, '/proxy/');
+                url += ',location.time_series.time';
+                url += '&location.time>1.0e12';
+                url += '&location._id=55';
+                
+                loadData(url, function(data) {
+                    var timeSeries = data[0][0][0];
+                    eventSource.loadJSON(timeSeries, url);
+                }, '/proxy/');
             }
 
             var resizeTimerID = null;
@@ -140,6 +141,9 @@
         </script>
     </head>
     <body onload="onLoad();" onresize="onResize();">
+        <div id="description">
+            <p>This demo downloads the position of the TAO buoys from a Dapper server, plotting them on an OpenLayers map. Each buoy can then be selected for data download. The contained variables (wind direction, temperature quality, etc.) are also downloaded from the server using a <code>DAS</code> request. The data is then plotted using SIMILE's Timeplot widget.</p>
+        </div>
         <div id="map"></div>
         <div id="variables"></div>
         <div id="timeplot"></div>
