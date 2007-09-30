@@ -20,12 +20,13 @@
             }
         </style>
 
+        <script type="text/javascript" src="http://code.google.com/p/jqueryjs/downloads/detail?name=jquery-1.2.1.pack.js"></script>
         <script type="text/javascript" src="http://static.simile.mit.edu/timeplot/api/1.0/timeplot-api.js"></script>
         <script type="text/javascript" src="js/OpenLayers/lib/OpenLayers.js"></script>
         <script type="text/javascript" src="../jsdap.js"></script>
 
         <script type="text/javascript">
-            var map, timeplot, eventSource;
+            var map, timeplot, eventSource, buoys;
             var activeBuoy;
             var baseurl = "http://dapper.pmel.noaa.gov/dapper/epic/tao_time_series.cdp";
 
@@ -43,7 +44,7 @@
                 map.setCenter(new OpenLayers.LonLat(-145, 0), 3);
 
                 // Add layer for the buoys.
-                var buoys = new OpenLayers.Layer.Markers('TAO array');
+                buoys = new OpenLayers.Layer.Markers('TAO array');
                 map.addLayer(buoys);
 
                 // Add buoys. Apparently, dapper always returns the data
@@ -52,15 +53,26 @@
                 loadData(url, function(data) {
                     var seqData = data[0];
                     var station, lon, lat, _id;
+                    var size = new OpenLayers.Size(21,25);
+                    var offset = new OpenLayers.Pixel(-(size.w/2), -size.h);
+                    var icon = new OpenLayers.Icon('js/OpenLayers/img/marker-blue.png',size,offset);
                     for (var i=0; i<seqData.length; i++) {
                         station = seqData[i];
                         lon = station[0] - 360.0;
                         lat = station[1];
                         _id = station[2];
                         
-                        var marker = new OpenLayers.Marker(new OpenLayers.LonLat(lon,lat));
+                        var marker = new OpenLayers.Marker(new OpenLayers.LonLat(lon,lat), icon.clone());
                         marker.metadata = {id: _id, lat: lat, lon: lon};
-                        marker.events.register('click', marker, toggleBuoy);
+                        marker.events.register('click', marker, function() {
+                            // Reset all buttons.
+                            for (var i=0; i<buoys.markers.length; i++) {
+                                buoys.markers[i].icon.imageDiv.firstChild.setAttribute(
+                                        'src', 'js/OpenLayers/img/marker-blue.png');
+                            }
+                            this.icon.imageDiv.firstChild.setAttribute('src', 'js/OpenLayers/img/marker.png');
+                            selectBuoy(this.metadata);
+                        });
                         buoys.addMarker(marker);
                     }
                 }, '/proxy/');
@@ -68,19 +80,16 @@
                 loadDataset(baseurl, function(dataset) {
                     var series = dataset.location.time_series;
 
-                    var html = '<p>Select one or more variables:</p><p>';
+                    $('#variables').append('<p id="buoy">No buoy selected.</p>');
                     var name, id;
                     for (child in series) {
-                        if (series[child].attributes) {
+                        if ((series[child].attributes) && (child != 'time')) {
                             name = series[child].attributes.long_name;
                             id = series[child].id;
-                            html += '<input class="variable" type="checkbox" name="' + id + '" id="' + id + '" value="' + id + '" /><label for="' + id + '">&nbsp;' + name + '</label><br>';
+                            $('#variables').append('<input class="variable" disabled="disabled" type="checkbox" name="' + id + '" id="' + id + '" value="' + id + '" /><label for="' + id + '">&nbsp;' + name + '</label><br />');
                         }
                     }
-                    html += '</p><p><input type="button" onclick="plotData()" value="Plot" /></p>';
-
-                    var div = document.getElementById('variables');
-                    div.innerHTML = html;
+                    $('<p><input type="button" value="Plot" /></p>').click(plotData).appendTo('#variables');
                 }, '/proxy/');
 
                 // Load timeplot.
@@ -91,6 +100,11 @@
                     })
                 ];
                 timeplot = Timeplot.create(document.getElementById('timeplot'), plotInfo);
+            }
+
+            function selectBuoy(metadata) {
+                $('#buoy').html('Buoy ' + metadata.id + ': ' + decToDeg(metadata.lat, 'NS') + ' ' + decToDeg(metadata.lon, 'EW'));
+                $('input.variable').removeAttr('disabled');
             }
 
             function plotData() {
@@ -105,14 +119,22 @@
                 }
                 if (!selected) return;
 
-                url = url.replace(/,$/, '');
-                url += ',location.time_series.time';
+                // Get buoy id.
+                for (var i=0; i<buoys.markers.length; i++) {
+                    var marker = buoys.markers[i];
+                    if (marker.icon.imageDiv.firstChild.getAttribute('src') == 'js/OpenLayers/img/marker.png') {
+                        var id = marker.metadata.id;
+                        break;
+                    }
+                }
+
+                url += 'location.time_series.time';
                 url += '&location.time>1.0e12';
-                url += '&location._id=55';
+                url += '&location._id=' + id;
                 
                 loadData(url, function(data) {
                     var timeSeries = data[0][0][0];
-                    eventSource.loadJSON(timeSeries, url);
+                    //eventSource.loadJSON(timeSeries, url);
                 }, '/proxy/');
             }
 
@@ -126,9 +148,6 @@
                 }
             }
 
-            function toggleBuoy(e) {
-            }
-
             function decToDeg(dec, axis) {
                 var deg = parseInt(dec);
                 var min = parseInt((dec - deg) * 60);
@@ -136,13 +155,13 @@
                 var index = deg > 0 ? axis[0] : axis[1];
                 var minPad = Math.abs(min) < 10 ? '0' : '';
                 var secPad = Math.abs(sec) < 10 ? '0' : '';
-                return Math.abs(deg) + '&deg;' + index + ' ' + minPad + Math.abs(min) + "'" + ' ' + secPad + Math.abs(sec) + '"';
+                return Math.abs(deg) + '&deg;' + minPad + Math.abs(min) + "'" + secPad + Math.abs(sec) + '"' + index;
             }
         </script>
     </head>
     <body onload="onLoad();" onresize="onResize();">
         <div id="description">
-            <p>This demo downloads the position of the TAO buoys from a Dapper server, plotting them on an OpenLayers map. Each buoy can then be selected for data download. The contained variables (wind direction, temperature quality, etc.) are also downloaded from the server using a <code>DAS</code> request. The data is then plotted using SIMILE's Timeplot widget.</p>
+            <p>This demo downloads the position of the <a href="http://www.pmel.noaa.gov/tao/">TAO buoys</a> from a <a href="http://dapper.pmel.noaa.gov/dapper/epic/">Dapper server</a> using a <code>DODS</code> request, plotting them on an <a href="http://openlayers.org/">OpenLayers</a> map. Each buoy can then be selected for data download. The contained variables (wind direction, temperature quality, etc.) are also downloaded from the server using <code>DDS/DAS</code> requests. The data is then plotted using <a href="http://simile.mit.edu/">SIMILE</a>'s <a href"http://simile.mit.edu/timeplot/">Timeplot</a> widget.</p>
         </div>
         <div id="map"></div>
         <div id="variables"></div>
