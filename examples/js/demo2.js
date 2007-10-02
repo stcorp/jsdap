@@ -1,6 +1,6 @@
 var map, timeplot, eventSource, buoys;
 var activeBuoy;
-var baseurl = "http://dapper.pmel.noaa.gov/dapper/epic/tao_time_series.cdp";
+var baseUrl = "http://dapper.pmel.noaa.gov/dapper/epic/tao_time_series.cdp";
 
 
 /*
@@ -26,20 +26,11 @@ function onLoad() {
 
     // Add buoys. Apparently, dapper always returns the data
     // in the order lon/lat/_id, independently of the projection.
-    var url = baseurl + ".dods?location.lon,location.lat,location._id";
+    var url = baseUrl + ".dods?location.lon,location.lat,location._id";
     loadData(url, plotBuoys, '/proxy/');
 
     // Read variables in each location.
-    loadDataset(baseurl, loadVariables, '/proxy/');
-
-    // Load timeplot.
-    eventSource = new Timeplot.DefaultEventSource();
-    var plotInfo = [
-        Timeplot.createPlotInfo({
-            id: "plot1"
-        })
-    ];
-    timeplot = Timeplot.create(document.getElementById('timeplot'), plotInfo);
+    loadDataset(baseUrl, loadVariables, '/proxy/');
 }
 
 
@@ -111,7 +102,7 @@ function selectBuoy() {
  * Download data for all the requested variables.
  */
 function getData() {
-    var url = baseurl + '.dods?';
+    var url = baseUrl + '.dods?';
     var selected = $('#variables :checkbox').filter(':checked');
     selected.each(function() {
         url += this.id + ',';
@@ -140,7 +131,28 @@ function getData() {
  */
 function plotData(data) {
     var timeSeries = data[0][0][0];
-    eventSource.loadJSON(timeSeries);
+
+    // Load timeplot.
+    eventSource = new Timeplot.DefaultEventSource();
+
+    var plotInfo = [];
+    var selected = $('#variables :checkbox').filter(':checked');
+    var timeIndex = 0;
+    selected.each(function(i) {
+        if (this.id == 'location.time_series.time') {
+            timeIndex = i;
+        } else {
+            plotInfo.push(
+                Timeplot.createPlotInfo({
+                    id: 'plot_' + this.id.split('.')[2],
+                    dataSource: new Timeplot.ColumnSource(eventSource,i+1)
+                })
+            );
+        }
+    }
+
+    timeplot = Timeplot.create(document.getElementById('timeplot'), plotInfo);
+    eventSource.loadSequence(timeSeries, timeIndex, baseUrl);
 }
 
 
@@ -173,7 +185,35 @@ function decToDeg(dec, axis) {
 }
 
 
-Timeplot.DefaultEventSource.prototype.loadJSON = function(json) {
-    // check example for mutliple plots.
-    // would it be possible to use columnsource data source directly with the processed json data after this call?
+Timeplot.DefaultEventSource.prototype.loadSequence = function(data, timeIndex, url) {
+    if (data == null) {
+        return;
+    }
+
+    this._events.maxValues = new Array();
+    var base = this._getBaseURL(url);
+
+    var dateTimeFormat = 'iso8601';
+    var parseDateTimeFunction = this._events.getUnit().getParser(dateTimeFormat);
+
+    var added = false;
+
+    if (data) {
+        for (var i=0; i<data.length; i++) {
+            var row = data[i];
+            if (row.length>1) {
+                var evt = new Timeplot.DefaultEventSource.NumericEvent(
+                    // XXX replace row[timeIndex] with iso8601 representation
+                    parseDateTimeFunction(row[timeIndex]),
+                    row // we can leave row whole here, because all vars are indexed.
+                );
+                this._events.add(evt);
+                added = true;
+            }
+        }
+    }
+
+    if (added) {
+        this._fire("onAddMany", []);
+    }
 }
