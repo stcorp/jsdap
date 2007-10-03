@@ -3,6 +3,40 @@ var activeBuoy;
 var baseUrl = "http://dapper.pmel.noaa.gov/dapper/epic/tao_time_series.cdp";
 
 
+Date.prototype.toISO8601String = function (format, offset) {
+    if (!format) { var format = 6; }
+    if (!offset) {
+        var offset = 'Z';
+        var date = this;
+    } else {
+        var d = offset.match(/([-+])([0-9]{2}):([0-9]{2})/);
+        var offsetnum = (Number(d[2]) * 60) + Number(d[3]);
+        offsetnum *= ((d[1] == '-') ? -1 : 1);
+        var date = new Date(Number(Number(this) + (offsetnum * 60000)));
+    }
+
+    var zeropad = function (num) { return ((num < 10) ? '0' : '') + num; }
+
+    var str = "";
+    str += date.getUTCFullYear();
+    if (format > 1) { str += "-" + zeropad(date.getUTCMonth() + 1); }
+    if (format > 2) { str += "-" + zeropad(date.getUTCDate()); }
+    if (format > 3) {
+        str += "T" + zeropad(date.getUTCHours()) +
+               ":" + zeropad(date.getUTCMinutes());
+    }
+    if (format > 5) {
+        var secs = Number(date.getUTCSeconds() + "." +
+                   ((date.getUTCMilliseconds() < 100) ? '0' : '') +
+                   zeropad(date.getUTCMilliseconds()));
+        str += ":" + zeropad(secs);
+    } else if (format > 4) { str += ":" + zeropad(date.getUTCSeconds()); }
+
+    if (format > 3) { str += offset; }
+    return str;
+}
+
+
 /*
  * Create the initial map, download location data & 
  * variables names, and prepare time plot.
@@ -119,7 +153,7 @@ function getData() {
     }
 
     url = url.replace(/,$/, '');
-    url += '&location.time>1.0e12';  // get only a couple of points for this demo.
+    url += '&location.time>1.1e12';  // get only a couple of points for this demo.
     url += '&location._id=' + id;
     
     loadData(url, plotData, '/proxy/');
@@ -129,6 +163,16 @@ function getData() {
 /*
  * Prepare and plot data.
  */
+var timeGeometry = new Timeplot.DefaultTimeGeometry({
+    gridColor: "#000000",
+    axisLabelsPlacement: "top"
+});
+
+var valueGeometry = new Timeplot.DefaultValueGeometry({
+    gridColor: "#000000",
+    axisLabelsPlacement: "left"
+});
+
 function plotData(data) {
     var timeSeries = data[0][0][0];
 
@@ -145,12 +189,14 @@ function plotData(data) {
             plotInfo.push(
                 Timeplot.createPlotInfo({
                     id: 'plot_' + this.id.split('.')[2],
-                    dataSource: new Timeplot.ColumnSource(eventSource,i+1)
+                    dataSource: new Timeplot.ColumnSource(eventSource, i+1),
+                    timeGeometry: timeGeometry,
+                    valueGeometry: valueGeometry,
+                    showValues: true
                 })
             );
         }
-    }
-
+    });
     timeplot = Timeplot.create(document.getElementById('timeplot'), plotInfo);
     eventSource.loadSequence(timeSeries, timeIndex, baseUrl);
 }
@@ -193,18 +239,19 @@ Timeplot.DefaultEventSource.prototype.loadSequence = function(data, timeIndex, u
     this._events.maxValues = new Array();
     var base = this._getBaseURL(url);
 
-    var dateTimeFormat = 'iso8601';
-    var parseDateTimeFunction = this._events.getUnit().getParser(dateTimeFormat);
-
     var added = false;
 
     if (data) {
-        for (var i=0; i<data.length; i++) {
+        //for (var i=0; i<data.length; i++) {
+        for (var i=0; i<100; i++) {
             var row = data[i];
-            if (row.length>1) {
+            if (row.length > 1) {
+                // units "msec since 1970-01-01 00:00:00 GMT"
+                var date = new Date();
+                date.setTime(row[timeIndex]);
+
                 var evt = new Timeplot.DefaultEventSource.NumericEvent(
-                    // XXX replace row[timeIndex] with iso8601 representation
-                    parseDateTimeFunction(row[timeIndex]),
+                    date,
                     row // we can leave row whole here, because all vars are indexed.
                 );
                 this._events.add(evt);
