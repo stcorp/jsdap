@@ -1,0 +1,62 @@
+<html>
+    <head>
+        <script type="text/javascript" src="../jsdap.js"></script>
+        <script type="text/javascript">
+            function load() {
+                var url = document.getElementById('url').value;
+                var div = document.getElementById('dataset');
+                loadDataset(url, function(data) {
+                    var root = document.getElementById('dataset');
+                    root.innerHTML = '';
+                    buildTree(root, data);
+                }, '/proxy/');
+                return false;
+            }
+
+            function buildTree(root, data) {
+                if (data.name) {
+                    var fieldset = document.createElement('fieldset');
+                    root.appendChild(fieldset);
+                    root = fieldset;
+
+                    var legend = document.createElement('legend');
+                    legend.appendChild(document.createTextNode(data.name));
+                    root.appendChild(legend);
+
+                    // Add attributes.
+                    addAttributes(data.attributes, root);
+
+                    for (child in data) {
+                        if (data[child].type) {
+                            buildTree(root, data[child]);
+                        }
+                    }    
+                }
+            }
+
+            function addAttributes(attributes, root) {
+                if (typeof(attributes) != 'object') {
+                    root.appendChild(document.createTextNode(attributes));
+                } else {
+                    var dl = document.createElement('dl');
+                    root.appendChild(dl);
+
+                    for (attr in attributes) {
+                        dl.appendChild(document.createElement('dt')
+                                .appendChild(document.createTextNode(attr)));
+                        var dd = document.createElement('dd');
+                        dl.appendChild(dd);
+                        addAttributes(attributes[attr], dd);
+                    }
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <form method="GET" action="#">
+            <input type="text" id="url" size="128" value="http://test.pydap.org/nc/coads.nc" />
+            <input type="button" value="load URL" onclick="load()" />
+        </form>
+        <div id="dataset"></div>
+    </body>
+</html>
