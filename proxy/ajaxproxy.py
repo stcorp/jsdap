@@ -18,7 +18,6 @@ def make_ajax_proxy(global_conf):
     return AjaxProxy
 
 
-@memoize()
 def AjaxProxy(environ, start_response):
     proxy = TransparentProxy()
 

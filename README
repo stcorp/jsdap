@@ -20,7 +20,7 @@ Python that comes together with jsdap.
 
     loadData(url, callback [, proxy])
 
-This functions read the data from a ``.dods.`` URL
+This functions read the data from a ``.dods`` URL
 (http://example.com/dataset.dods?var1,var2&var3>0), returning it
 as a nested list. This is the data for the whole dataset, so the
 outer list corresponds to the dataset objects, and each contained

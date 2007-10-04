@@ -153,7 +153,7 @@ function getData() {
     }
 
     url = url.replace(/,$/, '');
-    url += '&location.time>1.1e12';  // get only a couple of points for this demo.
+    //url += '&location.time>1.1e12';  // get only a couple of points for this demo.
     url += '&location._id=' + id;
     
     loadData(url, plotData, '/proxy/');
@@ -192,13 +192,14 @@ function plotData(data) {
                     dataSource: new Timeplot.ColumnSource(eventSource, i+1),
                     timeGeometry: timeGeometry,
                     valueGeometry: valueGeometry,
+                    lineColor: "#0000ff",
                     showValues: true
                 })
             );
         }
     });
     timeplot = Timeplot.create(document.getElementById('timeplot'), plotInfo);
-    eventSource.loadSequence(timeSeries, timeIndex, baseUrl);
+    eventSource.loadSequence(timeSeries, timeIndex, baseUrl, removeNaN);
 }
 
 
@@ -231,9 +232,30 @@ function decToDeg(dec, axis) {
 }
 
 
-Timeplot.DefaultEventSource.prototype.loadSequence = function(data, timeIndex, url) {
+function removeNaN(data) {
+    var i = 0;
+    while (i<data.length) {
+        // Remove all lines with NaN
+        for (var j=0; j<data[i].length; j++) {
+            if (isNaN(data[i][j])) {
+                data.splice(i, 1);
+                i--;
+                break
+            } 
+        }
+        i++;
+    }
+    return data;
+}
+
+
+Timeplot.DefaultEventSource.prototype.loadSequence = function(data, timeIndex, url, filter) {
     if (data == null) {
         return;
+    }
+
+    if (filter) {
+        data = filter(data);
     }
 
     this._events.maxValues = new Array();
@@ -242,8 +264,7 @@ Timeplot.DefaultEventSource.prototype.loadSequence = function(data, timeIndex, u
     var added = false;
 
     if (data) {
-        //for (var i=0; i<data.length; i++) {
-        for (var i=0; i<100; i++) {
+        for (var i=0; i<data.length; i++) {
             var row = data[i];
             if (row.length > 1) {
                 // units "msec since 1970-01-01 00:00:00 GMT"
