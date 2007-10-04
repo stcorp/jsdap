@@ -9,7 +9,7 @@ function proxyUrl(url, callback) {
             }
         };
         xml.overrideMimeType('text/plain; charset=x-user-defined');
-        xml.send();
+        xml.send('');
     }
 }
 
