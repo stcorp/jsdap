@@ -33,15 +33,6 @@ function pseudoSafeEval(str) {
 }
 
 
-function instanceOf(object, constructorFunction) {
-    while (object != null) {
-        if (object == constructorFunction.prototype) return true;
-        object = object.__proto__;
-    }
-    return false;
-}
-
-
 function dapType(type) {
     this.type = type;
     this.attributes = {};
@@ -100,7 +91,7 @@ function ddsParser(dds) {
                     if (includeParent) {
                         child.id = dapvar.id + '.' + child.id;
                     }
-                    if (instanceOf(child, dapType)) walk(child, true);
+                    walk(child, true);
                 }
             }
         }
