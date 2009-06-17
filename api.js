@@ -1,6 +1,9 @@
 function proxyUrl(url, callback) {
-    var xml = window.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest();
-    if (xml) {
+    if (IE_HACK) {
+        var vbArr = BinFileReaderImpl_IE_VBAjaxLoader(fileURL);
+        callback(vbArr.toArray());
+    } else {
+        var xml = new XMLHttpRequest();
         xml.open("GET", url, true);
 
         xml.onreadystatechange = function() {
@@ -16,7 +19,7 @@ function proxyUrl(url, callback) {
 
 function loadDataset(url, callback, proxy) {
     // User proxy?
-    if (proxy) url = proxy + encodeURIComponent(url);
+    if (proxy) url = proxy + '?url=' + encodeURIComponent(url);
 
     // Load DDS.
     proxyUrl(url + '.dds', function(dds) {
@@ -33,7 +36,7 @@ function loadDataset(url, callback, proxy) {
 
 function loadData(url, callback, proxy) {
     // User proxy?
-    if (proxy) url = proxy + encodeURIComponent(url);
+    if (proxy) url = proxy + '?url=' + encodeURIComponent(url);
 
     proxyUrl(url, function(dods) {
         var tmp = dods.split('\nData:\n');

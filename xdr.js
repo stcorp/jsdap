@@ -5,6 +5,7 @@
 
 var END_OF_SEQUENCE = '\xa5\x00\x00\x00';
 var START_OF_SEQUENCE = '\x5a\x00\x00\x00';
+var IE_HACK = (/msie/i.test(navigator.userAgent) && !/opera/i.test(navigator.userAgent));
 
 
 function dapUnpacker(xdrdata, dapvar) {
@@ -258,7 +259,11 @@ function readBits(buffer, start, length) {
 function getBuffer(data) {
     var b = new Array(data.length);
     for (var i=0; i<data.length; i++) {
-        b[i] = data.charCodeAt(i) & 0xff;
+        if (IE_HACK) {
+            b[i] = data[i];
+        } else {
+            b[i] = data.charCodeAt(i) & 0xff;
+        }
     }
     return b;
 }

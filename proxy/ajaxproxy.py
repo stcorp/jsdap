@@ -12,6 +12,7 @@ import urllib
 import urlparse
 
 from paste.proxy import TransparentProxy
+from paste.request import parse_dict_querystring
 
 
 def make_ajax_proxy(global_conf):
@@ -21,9 +22,8 @@ def make_ajax_proxy(global_conf):
 def AjaxProxy(environ, start_response):
     proxy = TransparentProxy()
 
-    address = environ['PATH_INFO']
-    address = urllib.unquote(address)
-    if address.startswith('/'): address = address[1:]
+    address = parse_dict_querystring(environ)['url']
+    address = urllib.unquote(address).lstrip('/')
 
     scheme, netloc, path, queries, fragment = urlparse.urlsplit(address)
     environ['wsgi.url_scheme'] = scheme

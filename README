@@ -32,17 +32,10 @@ There are a couple of demos of increasing complexity in the
 Limitations
 ===========
 
-Currently jsdap works only with Firefox, because the XML HTTP Request
-(XHR) was not designed for binary transfer. It can be made to work
-with IE by using the ``.responseBody`` attribute, and this is my
-first priority. It partially works with Safari, ocurring some data
-mangling on some variables. It doesn't work with Camino. Opera and
-Konqueror untested.
-
-Also, due to the XHR policy on not allowing cross-domain requests,
+Due to the XHR policy on not allowing cross-domain requests,
 you need a proxy to handle external datasets.
 
 License
 =======
 
-Jsdap is (c) 2007 Roberto De Almeida, licensed under the MIT license.
+Jsdap is (c) 2007--2009 Roberto De Almeida, licensed under the MIT license.
