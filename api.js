@@ -1,4 +1,4 @@
-function proxyUrl(url, callback) {
+function proxyUrl(url, callback, binary) {
     // Mozilla/Safari/IE7+
     if (window.XMLHttpRequest) {
         var xml = new XMLHttpRequest();
@@ -16,10 +16,12 @@ function proxyUrl(url, callback) {
 
     xml.onreadystatechange = function() {
         if (xml.readyState == 4) {
-            if (IE_HACK) {
-                callback(BinaryToString(xml.responseBody));
-            } else {
+            if (!binary) {
                 callback(xml.responseText);
+            } else if (IE_HACK) {
+                callback(BinaryToArray(xml.responseBody).toArray());
+            } else {
+                callback(getBuffer(xml.responseText));
             }
         }
     };
@@ -49,12 +51,14 @@ function loadData(url, callback, proxy) {
     if (proxy) url = proxy + '?url=' + encodeURIComponent(url);
 
     proxyUrl(url, function(dods) {
-        var tmp = dods.split('\nData:\n');
-        var dds = tmp[0];
-        var xdrdata = tmp[1];
+        var dds = '';
+        while (!dds.match(/\nData:\n$/)) {
+            dds += String.fromCharCode(dods.splice(0, 1));
+        }
+        dds = dds.substr(0, dds.length-7);
 
         var dapvar = new ddsParser(dds).parse();
-        var data = new dapUnpacker(xdrdata, dapvar).getValue();
+        var data = new dapUnpacker(dods, dapvar).getValue();
         callback(data);
-    });
+    }, true);
 }
