@@ -14,24 +14,25 @@
             #variables {
             }
 
-            #timeplot {
-                /*border: 1px solid black;*/
+            #plot {
                 height: 200px;
+                width: 100%;
             }
         </style>
 
+        <!--[if IE]><script language="javascript" type="text/javascript" src="js/excanvas.pack.js"></script><![endif]-->
         <script type="text/javascript" src="js/jquery-1.2.1.pack.js"></script>
-        <script type="text/javascript" src="http://static.simile.mit.edu/timeplot/api/1.0/timeplot-api.js"></script>
+        <script type="text/javascript" src="js/jquery.flot.pack.js"></script>
         <script type="text/javascript" src="js/OpenLayers/lib/OpenLayers.js"></script>
         <script type="text/javascript" src="js/jsdap.js"></script>
-        <script type="text/javascript" src="js/demo2.js"></script>
+        <script type="text/javascript" src="js/demo2a.js"></script>
     </head>
     <body onload="onLoad();" onresize="onResize();">
         <div id="description">
-            <p>This demo downloads the position of the <a href="http://www.pmel.noaa.gov/tao/">TAO buoys</a> from a <a href="http://dapper.pmel.noaa.gov/dapper/epic/">Dapper server</a> using a <code>DODS</code> request, plotting them on an <a href="http://openlayers.org/">OpenLayers</a> map. Each buoy can then be selected for data download. The contained variables (wind direction, temperature quality, etc.) are also downloaded from the server using <code>DDS/DAS</code> requests. The data is then plotted using <a href="http://simile.mit.edu/">SIMILE</a>'s <a href"http://simile.mit.edu/timeplot/">Timeplot</a> widget.</p>
+            <p>This demo downloads the position of the <a href="http://www.pmel.noaa.gov/tao/">TAO buoys</a> from a <a href="http://dapper.pmel.noaa.gov/dapper/epic/">Dapper server</a> using a <code>DODS</code> request, plotting them on an <a href="http://openlayers.org/">OpenLayers</a> map. Each buoy can then be selected for data download. The contained variables (wind direction, temperature quality, etc.) are also downloaded from the server using <code>DDS/DAS</code> requests. The data is then plotted using <a href="http://code.google.com/p/flot/">flot</a>.</p>
         </div>
         <div id="map"></div>
         <div id="variables"></div>
-        <div id="timeplot"></div>
+        <div id="plot"></div>
     </body>
 </html>

@@ -1,4 +1,4 @@
-var map, timeplot, eventSource, buoys;
+var map, buoys;
 var activeBuoy;
 var baseUrl = "http://dapper.pmel.noaa.gov/dapper/epic/tao_time_series.cdp";
 
@@ -39,7 +39,7 @@ Date.prototype.toISO8601String = function (format, offset) {
 
 /*
  * Create the initial map, download location data & 
- * variables names, and prepare time plot.
+ * variables names.
  */
 function onLoad() {
     // Load map.
@@ -153,67 +153,25 @@ function getData() {
     }
 
     url = url.replace(/,$/, '');
-    //url += '&location.time>1.1e12';  // get only a couple of points for this demo.
+    url += '&location.time>1.1e12';  // get only a couple of points for this demo.
     url += '&location._id=' + id;
     
     loadData(url, plotData, '/proxy/');
 }
 
 
-/*
- * Prepare and plot data.
- */
-var timeGeometry = new Timeplot.DefaultTimeGeometry({
-    gridColor: "#000000",
-    axisLabelsPlacement: "top"
-});
-
-var valueGeometry = new Timeplot.DefaultValueGeometry({
-    gridColor: "#000000",
-    axisLabelsPlacement: "left"
-});
-
 function plotData(data) {
     var timeSeries = data[0][0][0];
-
-    // Load timeplot.
-    eventSource = new Timeplot.DefaultEventSource();
-
-    var plotInfo = [];
-    var selected = $('#variables :checkbox').filter(':checked');
-    var timeIndex = 0;
-    selected.each(function(i) {
-        if (this.id == 'location.time_series.time') {
-            timeIndex = i;
-        } else {
-            plotInfo.push(
-                Timeplot.createPlotInfo({
-                    id: 'plot_' + this.id.split('.')[2],
-                    dataSource: new Timeplot.ColumnSource(eventSource, i+1),
-                    timeGeometry: timeGeometry,
-                    valueGeometry: valueGeometry,
-                    lineColor: "#0000ff",
-                    showValues: true
-                })
-            );
+    var d = [];
+    var timeIndex = timeSeries[0].length-1;
+    for (var i=0; i<timeIndex; i++) {
+        variable = [];
+        for (var j=0; j<timeSeries.length; j++) {
+            variable.push([timeSeries[j][timeIndex], timeSeries[j][i]]);
         }
-    });
-    timeplot = Timeplot.create(document.getElementById('timeplot'), plotInfo);
-    eventSource.loadSequence(timeSeries, timeIndex, baseUrl, removeNaN);
-}
-
-
-/*
- * Resizer function for the plot.
- */
-var resizeTimerID = null;
-function onResize() {
-    if (resizeTimerID == null) {
-        resizeTimerID = window.setTimeout(function() {
-            resizeTimerID = null;
-            timeplot.repaint();
-        }, 100);
+        d.push(variable);
     }
+    $.plot($("#plot"), d, { xaxis: { mode: "time" } });
 }
 
 
@@ -246,42 +204,4 @@ function removeNaN(data) {
         i++;
     }
     return data;
-}
-
-
-Timeplot.DefaultEventSource.prototype.loadSequence = function(data, timeIndex, url, filter) {
-    if (data == null) {
-        return;
-    }
-
-    if (filter) {
-        data = filter(data);
-    }
-
-    this._events.maxValues = new Array();
-    var base = this._getBaseURL(url);
-
-    var added = false;
-
-    if (data) {
-        for (var i=0; i<data.length; i++) {
-            var row = data[i];
-            if (row.length > 1) {
-                // units "msec since 1970-01-01 00:00:00 GMT"
-                var date = new Date();
-                date.setTime(row[timeIndex]);
-
-                var evt = new Timeplot.DefaultEventSource.NumericEvent(
-                    date,
-                    row // we can leave row whole here, because all vars are indexed.
-                );
-                this._events.add(evt);
-                added = true;
-            }
-        }
-    }
-
-    if (added) {
-        this._fire("onAddMany", []);
-    }
 }
