@@ -1,6 +1,6 @@
 function proxyUrl(url, callback) {
     if (IE_HACK) {
-        var vbArr = BinFileReaderImpl_IE_VBAjaxLoader(fileURL);
+        var vbArr = BinFileReaderImpl_IE_VBAjaxLoader(url);
         callback(vbArr.toArray());
     } else {
         var xml = new XMLHttpRequest();
