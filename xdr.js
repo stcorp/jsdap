@@ -259,11 +259,7 @@ function readBits(buffer, start, length) {
 function getBuffer(data) {
     var b = new Array(data.length);
     for (var i=0; i<data.length; i++) {
-        if (IE_HACK) {
-            b[i] = data[i];
-        } else {
-            b[i] = data.charCodeAt(i) & 0xff;
-        }
+        b[i] = data.charCodeAt(i) & 0xff;
     }
     return b;
 }

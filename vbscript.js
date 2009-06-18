@@ -1,28 +1,9 @@
-document.write('<script type="text/vbscript">\n\
-Function BinFileReaderImpl_IE_VBAjaxLoader(fileName)\n\
-    Dim xhr\n\
-    Set xhr = CreateObject("Microsoft.XMLHTTP")\n\
-\n\
-    xhr.Open "GET", fileName, False\n\
-\n\
-    xhr.setRequestHeader "Accept-Charset", "x-user-defined"\n\
-    xhr.send\n\
-\n\
-    Dim byteArray()\n\
-\n\
-    if xhr.Status = 200 Then\n\
-        Dim byteString\n\
-        Dim i\n\
-\n\
-        byteString=xhr.responseBody\n\
-\n\
-        ReDim byteArray(LenB(byteString))\n\
-\n\
-        For i = 1 To LenB(byteString)\n\
-            byteArray(i-1) = AscB(MidB(byteString, i, 1))\n\
+if (IE_HACK) document.write('<script type="text/vbscript">\n\
+    Function BinaryToString(Binary)\n\
+        Dim I,S\n\
+        For I = 1 to LenB(Binary)\n\
+            S = S & Chr(AscB(MidB(Binary,I,1)))\n\
         Next\n\
-    End If\n\
-\n\
-    BinFileReaderImpl_IE_VBAjaxLoader=byteArray\n\
-End Function\n\
+        BinaryToString = S\n\
+    End Function\n\
 </script>');

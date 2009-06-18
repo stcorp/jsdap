@@ -1,19 +1,29 @@
 function proxyUrl(url, callback) {
-    if (IE_HACK) {
-        var vbArr = BinFileReaderImpl_IE_VBAjaxLoader(url);
-        callback(vbArr.toArray());
-    } else {
+    // Mozilla/Safari/IE7+
+    if (window.XMLHttpRequest) {
         var xml = new XMLHttpRequest();
-        xml.open("GET", url, true);
+    // IE6
+    } else if (window.ActiveXObject) {
+        var xml = new ActiveXObject("Microsoft.XMLHTTP");
+    }
 
-        xml.onreadystatechange = function() {
-            if (xml.readyState == 4) {
+    xml.open("GET", url, true);
+    if (xml.overrideMimeType) {
+        xml.overrideMimeType('text/plain; charset=x-user-defined');
+    } else {
+        xml.setRequestHeader('Accept-Charset', 'x-user-defined');
+    }
+
+    xml.onreadystatechange = function() {
+        if (xml.readyState == 4) {
+            if (IE_HACK) {
+                callback(BinaryToString(xml.responseBody));
+            } else {
                 callback(xml.responseText);
             }
-        };
-        xml.overrideMimeType('text/plain; charset=x-user-defined');
-        xml.send('');
-    }
+        }
+    };
+    xml.send('');
 }
 
 
