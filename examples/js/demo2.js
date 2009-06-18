@@ -1,40 +1,7 @@
 var map, buoys;
+var timeIndex = 0;
 var activeBuoy;
 var baseUrl = "http://dapper.pmel.noaa.gov/dapper/epic/tao_time_series.cdp";
-
-
-Date.prototype.toISO8601String = function (format, offset) {
-    if (!format) { var format = 6; }
-    if (!offset) {
-        var offset = 'Z';
-        var date = this;
-    } else {
-        var d = offset.match(/([-+])([0-9]{2}):([0-9]{2})/);
-        var offsetnum = (Number(d[2]) * 60) + Number(d[3]);
-        offsetnum *= ((d[1] == '-') ? -1 : 1);
-        var date = new Date(Number(Number(this) + (offsetnum * 60000)));
-    }
-
-    var zeropad = function (num) { return ((num < 10) ? '0' : '') + num; }
-
-    var str = "";
-    str += date.getUTCFullYear();
-    if (format > 1) { str += "-" + zeropad(date.getUTCMonth() + 1); }
-    if (format > 2) { str += "-" + zeropad(date.getUTCDate()); }
-    if (format > 3) {
-        str += "T" + zeropad(date.getUTCHours()) +
-               ":" + zeropad(date.getUTCMinutes());
-    }
-    if (format > 5) {
-        var secs = Number(date.getUTCSeconds() + "." +
-                   ((date.getUTCMilliseconds() < 100) ? '0' : '') +
-                   zeropad(date.getUTCMilliseconds()));
-        str += ":" + zeropad(secs);
-    } else if (format > 4) { str += ":" + zeropad(date.getUTCSeconds()); }
-
-    if (format > 3) { str += offset; }
-    return str;
-}
 
 
 /*
@@ -138,7 +105,8 @@ function selectBuoy() {
 function getData() {
     var url = baseUrl + '.dods?';
     var selected = $('#variables :checkbox').filter(':checked');
-    selected.each(function() {
+    selected.each(function(i) {
+        if (this.id == 'location.time_series.time') timeIndex = i;
         url += this.id + ',';
     });
     if (selected.length <= 1) return;
@@ -153,7 +121,7 @@ function getData() {
     }
 
     url = url.replace(/,$/, '');
-    url += '&location.time>1.1e12';  // get only a couple of points for this demo.
+    //url += '&location.time>1.1e12';  // get only a couple of points for this demo.
     url += '&location._id=' + id;
     
     loadData(url, plotData, '/proxy/');
@@ -163,13 +131,15 @@ function getData() {
 function plotData(data) {
     var timeSeries = data[0][0][0];
     var d = [];
-    var timeIndex = timeSeries[0].length-1;
-    for (var i=0; i<timeIndex; i++) {
-        variable = [];
-        for (var j=0; j<timeSeries.length; j++) {
-            variable.push([timeSeries[j][timeIndex], timeSeries[j][i]]);
+    var n = timeSeries[0].length;
+    for (var i=0; i<n; i++) {
+        if (i != timeIndex) {
+            variable = [];
+            for (var j=0; j<timeSeries.length; j++) {
+                variable.push([timeSeries[j][timeIndex], timeSeries[j][i]]);
+            }
+            d.push(variable);
         }
-        d.push(variable);
     }
     $.plot($("#plot"), d, { xaxis: { mode: "time" } });
 }
