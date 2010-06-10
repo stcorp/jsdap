@@ -268,13 +268,13 @@ function getBuffer(data) {
 function decodeInt(data, bytes, signed) {
     var x = readBits(data, 0, bytes*8);
     var max = Math.pow(2, bytes*8);
-    var int;
+    var integer;
     if (signed && x >= (max / 2)) {
-        int = x - max;
+        integer = x - max;
     } else {
-        int = x;
+        integer = x;
     }
-    return int; 
+    return integer; 
 }
 
 
