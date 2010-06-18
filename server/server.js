@@ -1,18 +1,14 @@
+var sys = require('sys');
 var http = require('http');
 var url = require('url');
-var sys = require('sys');
 var Buffer = require('buffer').Buffer;
-var url = require('url');
 
 var jspack = require('./jspack').jspack;
 var dataset = require('./dataset').dataset;
 
-var START_OF_SEQUENCE = "\x5a\x00\x00\x00";
-var END_OF_SEQUENCE = "\xa5\x00\x00\x00";
-
 var MAP = {
     'int16'  : 'i',  // packed in 4 bytes
-    'uint16' : 'i',  // packed in 4 bytes
+    'uint16' : 'I',  // packed in 4 bytes
     'int32'  : 'i',
     'uint32' : 'I',
     'int'    : 'i',
@@ -20,6 +16,11 @@ var MAP = {
     'float32': 'f',
     'float64': 'd'
 }
+
+StopIteration = function () {};
+StopIteration.prototype = new Error();
+StopIteration.name = 'StopIteration';
+StopIteration.message = 'StopIteration';
 
 function dds (dataset) {
     var output = "Dataset {\n  Sequence {\n";
@@ -34,7 +35,7 @@ function das (dataset) {
     var output = "Attributes {\n  " + dataset.sequence + " {\n";
     for (var name in dataset.vars) {
         output += "    " + name + " {\n";
-        for (k in dataset.vars[name].attributes) {
+        for (var k in dataset.vars[name].attributes) {
             var v = dataset.vars[name].attributes[k];
             output += "      " + getType(v) + " " + k + " " + encodeAtom(v) + ";\n";
         }
@@ -59,92 +60,81 @@ function getType (v) {
 }
 
 function encodeAtom (v) {
-    if (typeof(v) == 'string') {
-        return escape(v);
-    } else if (typeof(v) == 'number') {
-        return String(v.toFixed(6));
-    } else {
-        return escape(String(v));
-    }
+    return JSON.stringify(v).replace(/^\[/, '').replace(/\]$/, '');
 }
 
 function constrain (dataset, search) {
-    if (search === undefined) return dataset;
-    search = search.substring(1);  // remove '?'
+    search = (search === undefined) ? '' : search.replace(/^\?/, '');  // remove '?' from request
 
     // work with a copy
     var filtered = {
         name: dataset.name,
         sequence: dataset.sequence,
-        data: [],
         vars: {}
+        // data will be replaced by an iterable
     }
-    for (var name in dataset.vars) {
-        filtered.vars[name] = dataset.vars[name];
-    }
-    var data = [];
-    for (var row=0; row<dataset.data.length; row++) {
-        data.push( dataset.data[row].slice(0) );
-    }
-    filtered.data = data;
 
     // parse projection and selection
-    var projection = [];
+    var order = [];
+    for (var name in dataset.vars) {
+        order.push(name);
+    }
+    var projection = order.slice(0);  // copy order
     var selection = search.split('&');
-    if (!selection[0].match(/<=|>=|!=|=~|>|<|=/)) {
+    if ((selection != '') && (!selection[0].match(/<=|>=|!=|=~|>|<|=/))) {
         projection = selection.splice(0, 1)[0].split(',');
     }
+    // check for direct sequence request
+    for (var i=0; i<projection.length; i++) {
+        if (projection[i] == dataset.sequence) {
+            projection = order.slice(0);
+            break;
+        }
+    }
 
-    // filter data according to selection
-    filters = [];
+    // get order of requested variables
+    var name, indexes = [];
+    for (var i=0; i<projection.length; i++) {
+        name = projection[i];
+        if (name.indexOf('.') != -1) name = name.split('.')[1];
+        filtered.vars[name] = dataset.vars[name];
+        indexes.push( order.indexOf(name) );
+    }
+
+    // build filter from selection
+    var filters = [];
     for (var i=0; i<selection.length; i++) {
         if (selection[i].match(/<=|>=|!=|=~|>|<|=/)) {
-            filters.push( buildFilter(selection[i], filtered.vars) );
+            filters.push( buildFilter(selection[i], dataset.vars) );
         }
     }
-    if (filters.length) {
-        out = [];
-        for (var i=0; i<filtered.data.length; i++) {
-            var row = filtered.data[i];
-            var skip = false;
-            for (var j=0; j<filters.length; j++) {
-                if (!filters[j](row)) {
-                    skip = true;
-                    break;
+
+    // return an iterable
+    var i = 0, skip, row;
+    filtered.data = {
+        'next': function () {
+            while (i < dataset.data.length) {
+                skip = false;
+                for (var j=0; j<filters.length; j++) {
+                    if (!filters[j](dataset.data[i])) {
+                        i++;
+                        skip = true;
+                        break;
+                    }
+                }
+                if (!skip) {
+                    row = [];
+                    // reorder data 
+                    for (var j=0; j<indexes.length; j++) {
+                        row.push( dataset.data[i][ indexes[j] ]);
+                    }
+                    i++;
+                    return row;
                 }
             }
-            if (!skip) out.push(row);
+            throw StopIteration;
         }
-        filtered.data = out;
-    }
-
-    // now return only requested variables
-    if (projection.length) {
-        var vars = {};
-        var indexes = [];
-        var order = [];
-        for (var name in filtered.vars) {
-            order.push(name);
-        }
-        for (var i=0; i<projection.length; i++) {
-            var name = projection[i];
-            if (name.indexOf('.') != -1) name = name.split('.')[1];
-            vars[name] = filtered.vars[name];
-            indexes.push( order.indexOf(name) );
-        }
-        filtered.vars = vars;
-
-        // reorder data 
-        var row, out = [];
-        for (var i=0; i<filtered.data.length; i++) {
-            row = [];
-            for (var j=0; j<indexes.length; j++) {
-                row.push( filtered.data[i][ indexes[j] ] );
-            }
-            out.push(row);
-        }
-        filtered.data = out;
-    }
+    };
 
     return filtered;
 }
@@ -199,12 +189,19 @@ http.createServer(function (req, res) {
             for (var name in filtered.vars) {
                 fmt += MAP[filtered.vars[name].type.toLowerCase()];
             }
-            for (var row=0; row<filtered.data.length; row++) {
-                res.write(START_OF_SEQUENCE, 'binary');
-                octets = jspack.Pack(fmt, filtered.data[row]);
-                res.write(new Buffer(octets), 'binary');
+            try {
+                while (true) {
+                    var row = filtered.data.next();
+                    res.write("\x5a\x00\x00\x00", 'binary');  // start of sequence
+                    octets = jspack.Pack(fmt, row);
+                    res.write(new Buffer(octets), 'binary');
+                }
+            } catch (e) {
+                if (e != StopIteration) {
+                    throw e;
+                }
             }
-            res.end(END_OF_SEQUENCE, 'binary');
+            res.end("\xa5\x00\x00\x00", 'binary');  // end of sequence
             break;
         default:
             res.writeHead(404, {'Content-type': 'text/plain'});
