@@ -5,5 +5,5 @@ jsdap.pack.js: jsdap.js
 	cp jsdap.pack.js examples/js
 
 jsdap.js: header.js parser.js xdr.js api.js vbscript.js
-	cat header.js parser.js xdr.js api.js vbscript.js > jsdap.js
+	cat header.js hack.js parser.js xdr.js api.js vbscript.js > jsdap.js
 	cp jsdap.js examples/js
