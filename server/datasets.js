@@ -6,6 +6,7 @@ var xdr = require('../xdr');
 var parser = require('../parser');
 
 function Proxy (remote, name, sequence) {
+    sys.puts('Loading ' + remote);
     var dataset = {
         'name'    : name     || 'nameless',
         'sequence': sequence || 'sequence',
@@ -14,7 +15,7 @@ function Proxy (remote, name, sequence) {
     }
 
     var parsed = url.parse(remote);
-    var opendap = http.createClient(parseInt(parsed.port), parsed.hostname);
+    var opendap = http.createClient(parseInt(parsed.port || '80'), parsed.hostname);
     var request = opendap.request('GET', parsed.pathname + '.dods',
         {'host': parsed.hostname});
     request.addListener('response', function (response) {
@@ -61,3 +62,4 @@ function Proxy (remote, name, sequence) {
 }
 
 exports.dataset1 = Proxy('http://localhost:8001/simple.sql');
+exports.dataset2 = Proxy('http://www.webapps.nwfsc.noaa.gov/pydap/beaches.sql');
