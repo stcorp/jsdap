@@ -1,20 +1,17 @@
-var sys = require('sys');
-var http = require('http');
-var url = require('url');
-var Buffer = require('buffer').Buffer;
+var sys = require('sys'),
+    http = require('http'),
+    url = require('url'),
+    Buffer = require('buffer').Buffer;
 
-var jspack = require('./jspack').jspack;
-var dataset = require('./dataset').dataset;
+var jspack = require('./jspack').jspack,
+    datasets = require('./datasets');
 
 var MAP = {
     'int16'  : 'i',  // packed in 4 bytes
     'uint16' : 'I',  // packed in 4 bytes
-    'int32'  : 'i',
-    'uint32' : 'I',
-    'int'    : 'i',
-    'uint'   : 'I',
-    'float32': 'f',
-    'float64': 'd'
+    'int32'  : 'i', 'int'    : 'i',
+    'uint32' : 'I', 'uint'   : 'I',
+    'float32': 'f', 'float64': 'd'
 }
 
 StopIteration = function () {};
@@ -64,8 +61,6 @@ function encodeAtom (v) {
 }
 
 function constrain (dataset, search) {
-    search = (search === undefined) ? '' : search.replace(/^\?/, '');  // remove '?' from request
-
     // work with a copy
     var filtered = {
         name: dataset.name,
@@ -79,8 +74,8 @@ function constrain (dataset, search) {
     for (var name in dataset.vars) {
         order.push(name);
     }
-    var projection = order.slice(0);  // copy order
-    var selection = search.split('&');
+    var projection = order.slice(0),  // copy order
+        selection = search.split('&');
     if ((selection != '') && (!selection[0].match(/<=|>=|!=|=~|>|<|=/))) {
         projection = selection.splice(0, 1)[0].split(',');
     }
@@ -164,22 +159,33 @@ function buildFilter (cond, vars) {
 }
 
 http.createServer(function (req, res) {
-    var filtered = constrain(dataset, url.parse(req.url).search);
+    var parsed = url.parse(req.url),
+        tokens = parsed.pathname.split('.'),
+        filename = tokens[0].replace(/^\//, ''),  // remove leading '/'
+        response = tokens[1],
+        dataset = datasets[filename],
+        filtered;
+    if (dataset === undefined) {
+        filtered = dataset;
+        response = 'error';  // force a 404
+    } else {
+        filtered = constrain(dataset, (parsed.search || '').replace(/^\?/, ''));
+    }
 
-    switch (url.parse(req.url).pathname) {
-        case '/.das':
+    switch (response) {
+        case 'das':
             res.writeHead(200, {
                 'Content-description': 'dods_das',
                 'Content-type': 'text/plain'});
             res.end(das(dataset));  // use the unfiltered dataset
             break;
-        case '/.dds':
+        case 'dds':
             res.writeHead(200, {
                 'Content-description': 'dods_dds',
                 'Content-type': 'text/plain'});
             res.end(dds(filtered));
             break;
-        case '/.dods':
+        case 'dods':
             res.writeHead(200, {
                 'Content-description': 'dods_data',
                 'Content-type': 'application/octet-stream'});
@@ -207,6 +213,5 @@ http.createServer(function (req, res) {
             res.writeHead(404, {'Content-type': 'text/plain'});
             res.end('Page not found.');
     }
-
 }).listen(8002);
 sys.puts('Server running at http://127.0.0.1:8002/');
