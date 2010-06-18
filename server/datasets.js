@@ -62,4 +62,5 @@ function Proxy (remote, name, sequence) {
 }
 
 exports.dataset1 = Proxy('http://localhost:8001/simple.sql');
-exports.dataset2 = Proxy('http://www.webapps.nwfsc.noaa.gov/pydap/beaches.sql');
+exports.dataset2 = Proxy('https://www.webapps.nwfsc.noaa.gov/pydap/beaches.sql');
+exports.dataset3 = Proxy('http://test.opendap.org:8080/dods/dts/D1');

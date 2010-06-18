@@ -11,7 +11,8 @@ var MAP = {
     'uint16' : 'I',  // packed in 4 bytes
     'int32'  : 'i', 'int'    : 'i',
     'uint32' : 'I', 'uint'   : 'I',
-    'float32': 'f', 'float64': 'd'
+    'float32': 'f', 'float64': 'd',
+    'string' : 's', 'url'    : 's'
 }
 
 StopIteration = function () {};
@@ -191,15 +192,28 @@ http.createServer(function (req, res) {
                 'Content-type': 'application/octet-stream'});
             res.write(dds(filtered));
             res.write('Data:\n');
-            fmt = '>';  // big endian
+            var typecodes = []
             for (var name in filtered.vars) {
-                fmt += MAP[filtered.vars[name].type.toLowerCase()];
+                typecodes.push( MAP[filtered.vars[name].type.toLowerCase()] );
             }
             try {
                 while (true) {
+                    var len, typecode, fmt = [], out = [];
                     var row = filtered.data.next();
+                    for (var i=0; i<row.length; i++) {
+                        typecode = typecodes[i];
+                        if (typecode == 's') {
+                            // pack length
+                            len = row[i].length + 4 - (row[i].length % 4);
+                            out.push(len);
+                            fmt.push('i');
+                            typecode = len + 's';
+                        }
+                        out.push( row[i] );
+                        fmt.push(typecode);
+                    }
                     res.write("\x5a\x00\x00\x00", 'binary');  // start of sequence
-                    octets = jspack.Pack(fmt, row);
+                    octets = jspack.Pack(fmt.join(''), out);
                     res.write(new Buffer(octets), 'binary');
                 }
             } catch (e) {
