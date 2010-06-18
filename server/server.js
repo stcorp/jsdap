@@ -160,7 +160,7 @@ function buildFilter (cond, vars) {
 }
 
 http.createServer(function (req, res) {
-    var parsed = url.parse(req.url),
+    var parsed = url.parse(unescape(req.url)),
         tokens = parsed.pathname.split('.'),
         filename = tokens[0].replace(/^\//, ''),  // remove leading '/'
         response = tokens[1],

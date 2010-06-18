@@ -53,7 +53,7 @@ function Proxy (remote, name, sequence) {
                 }
             }
 
-            sys.puts('Dataset ' + remote + ' loaded');
+            sys.puts('Dataset ' + remote + ' \033[01;32mloaded\033[0m');
         });
     });
     request.end();
@@ -62,5 +62,15 @@ function Proxy (remote, name, sequence) {
 }
 
 exports.dataset1 = Proxy('http://localhost:8001/simple.sql');
-exports.dataset2 = Proxy('https://www.webapps.nwfsc.noaa.gov/pydap/beaches.sql');
+//exports.dataset2 = Proxy('https://www.webapps.nwfsc.noaa.gov/pydap/beaches.sql');
 exports.dataset3 = Proxy('http://test.opendap.org:8080/dods/dts/D1');
+exports.dataset4 = {
+    name: "temp3.dat",
+    sequence: "seq",
+    data: [[1,2,1,'one'],[2,4,4,'two'],[3,6,9,'three'],[4,8,16,'four']],
+    vars: {
+        xval: {type: "Float32", attributes: {units: "meters per second"}},
+        yval: {type: "Int16", attributes: {units: "kilograms per minute"}},
+        zval: {type: "Int16", attributes: {units: "tons per hour"}},
+        wval: {type: "String", attributes: {units: "numbers"}}}};
+
