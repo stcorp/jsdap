@@ -5,7 +5,6 @@
 
 var END_OF_SEQUENCE = '\xa5\x00\x00\x00';
 var START_OF_SEQUENCE = '\x5a\x00\x00\x00';
-var IE_HACK = (/msie/i.test(navigator.userAgent) && !/opera/i.test(navigator.userAgent));
 
 
 function dapUnpacker(xdrdata, dapvar) {
@@ -298,3 +297,7 @@ function decodeFloat(buffer, precisionBits, exponentBits) {
         : (1 + signal * -2) * (exponent || significand ? !exponent ? Math.pow(2, -bias + 1) * significand
         : Math.pow(2, exponent - bias) * (1 + significand) : 0);
 }
+
+
+exports.getBuffer = getBuffer;
+exports.dapUnpacker = dapUnpacker;
