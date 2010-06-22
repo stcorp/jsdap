@@ -6,7 +6,7 @@ var xdr = require('../xdr');
 var parser = require('../parser');
 
 function Proxy (remote, name, sequence) {
-    sys.puts('Loading ' + remote);
+    sys.puts('Loading ' + remote + ' \033[01;31mwait\033[0m');
     var dataset = {
         'name'    : name     || 'nameless',
         'sequence': sequence || 'sequence',
