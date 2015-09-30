@@ -16,7 +16,7 @@ JSON response (http://pydap.org/2.x/responses/json.html).
 
 Note that if the server is on a different domain you need to specify
 a proxy to handle the requests. There's a simple proxy written in
-Python that comes together with jsdap.
+Python that comes together with jsdap.::
 
     loadData(url, callback [, proxy])
 
