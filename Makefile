@@ -7,3 +7,7 @@ jsdap.pack.js: jsdap.js
 jsdap.js: header.js parser.js xdr.js api.js vbscript.js
 	cat header.js hack.js parser.js xdr.js api.js vbscript.js > jsdap.js
 	cp jsdap.js examples/js
+
+clean:
+	rm jsdap.pack.js examples/js/jsdap.pack.js
+	rm jsdap.js examples/js/jsdap.js
