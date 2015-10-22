@@ -212,7 +212,7 @@ function dapUnpacker(xdrdata, dapvar) {
             i = this._pos;
             var data = this._buf.slice(i, i+n);
 
-            padding = (4 - (n % 4)) % 4;
+            var padding = (4 - (n % 4)) % 4;
             this._pos = i + n + padding;
 
             // convert back to string
