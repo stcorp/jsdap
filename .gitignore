@@ -1,5 +1,9 @@
+#Dist / packaging #
+###################
+node_modules/
+
 # Compiled source #
 ###################
 jsdap.js
-jsdap.pack.js
+jsdap.min.js
 *.pyc

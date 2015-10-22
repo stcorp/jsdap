@@ -1,0 +1,21 @@
+{
+  "name": "jsdap",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "main": "src/api.js",
+  "dependencies": {},
+  "devDependencies": {
+    "uglifyjs": "^2.4.10"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org:jetfuse/jsdap.git"
+  },
+  "author": "",
+  "license": "",
+  "homepage": "https://bitbucket.org/jetfuse/jsdap"
+}
