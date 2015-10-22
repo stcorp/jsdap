@@ -62,3 +62,7 @@ function loadData(url, callback, proxy) {
         callback(data);
     }, true);
 }
+
+
+exports.loadDataset = loadDataset;
+exports.loadData = loadData;
