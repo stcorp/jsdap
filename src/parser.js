@@ -44,7 +44,7 @@ function simpleParser(input) {
 
     this.peek = function(expr) {
         var regExp = new RegExp('^' + expr, 'i');
-        m = this.stream.match(regExp);
+        var m = this.stream.match(regExp);
         if (m) {
             return m[0];
         } else {
@@ -54,7 +54,7 @@ function simpleParser(input) {
 
     this.consume = function(expr) {
         var regExp = new RegExp('^' + expr, 'i');
-        m = this.stream.match(regExp);
+        var m = this.stream.match(regExp);
         if (m) {
             this.stream = this.stream.substr(m[0].length).ltrim();
             return m[0];
