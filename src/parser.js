@@ -3,7 +3,7 @@ var structures = ['Sequence', 'Structure', 'Dataset'];
 
 
 Array.prototype.contains = function (item) {
-    for (i = 0, el = this[i]; i < this.length; el = this[++i]) {
+    for (var i = 0, el = this[i]; i < this.length; el = this[++i]) {
         if (item == el) return true;
     }
     return false;
@@ -84,8 +84,8 @@ function ddsParser(dds) {
 
         // Set id.
         function walk(dapvar, includeParent) {
-            for (attr in dapvar) {
-                child = dapvar[attr];
+            for (var attr in dapvar) {
+                var child = dapvar[attr];
                 if (child.type) {
                     child.id = child.name;
                     if (includeParent) {
@@ -121,7 +121,7 @@ function ddsParser(dds) {
         baseType.shape = [];
         while (!this.peek(';')) {
             this.consume('\\[');
-            token = this.consume('\\w+');
+            var token = this.consume('\\w+');
             if (this.peek('=')) {
                 baseType.dimensions.push(token);
                 this.consume('=');
