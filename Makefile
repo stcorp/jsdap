@@ -2,7 +2,7 @@
 TARGET	= jsdap
 
 #Input files
-SOURCES = src/header.js src/parser.js src/xdr.js src/api.js src/vbscript.js
+SOURCES = src/header.js src/hack.js src/parser.js src/xdr.js src/api.js src/vbscript.js
 
 #Binaries used in the build process
 CAT		= cat
