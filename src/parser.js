@@ -4,7 +4,7 @@ var structures = ['Sequence', 'Structure', 'Dataset'];
 
 Array.prototype.contains = function (item) {
     for (var i = 0, el = this[i]; i < this.length; el = this[++i]) {
-        if (item == el) return true;
+        if (item === el) return true;
     }
     return false;
 };
@@ -47,7 +47,8 @@ function simpleParser(input) {
         var m = this.stream.match(regExp);
         if (m) {
             return m[0];
-        } else {
+        }
+        else {
             return '';
         }
     };
@@ -58,8 +59,9 @@ function simpleParser(input) {
         if (m) {
             this.stream = this.stream.substr(m[0].length).ltrim();
             return m[0];
-        } else {
-            throw new Error("Unable to parse stream: " + this.stream.substr(0, 10));
+        }
+        else {
+            throw new Error('Unable to parse stream: ' + this.stream.substr(0, 10));
         }
     };
 }
@@ -156,7 +158,7 @@ function ddsParser(dds) {
 
         grid.name = this.consume('\\w+');
         this.consume(';');
-        
+
         return grid;
     };
 
@@ -218,16 +220,16 @@ function dasParser(das, dataset) {
         if (atomicTypes.contains(this.peek('\\w+').toLowerCase())) {
             this._attribute(this._target.attributes);
 
-            if (this._target.type == 'Grid') {
+            if (this._target.type === 'Grid') {
                 for (map in this._target.maps) {
                     if (this.dataset[map]) {
                         var map = this._target.maps[map];
-                        for (name in map.attributes) {
+                        for (var name in map.attributes) {
                             this.dataset[map].attributes[name] = map.attributes[name];
                         }
                     }
                 }
-            }                
+            }
         } else {
             this._container();
         }
@@ -237,9 +239,11 @@ function dasParser(das, dataset) {
         var name = this.consume('[\\w_\\.]+');
         this.consume('{');
 
+        var target;
+
         if (name.indexOf('.') > -1) {
             var names = name.split('.');
-            var target = this._target;
+            target = this._target;
             for (var i=0; i<names.length; i++) {
                 this._target = this._target[names[i]];
             }
@@ -250,8 +254,9 @@ function dasParser(das, dataset) {
             this.consume('}');
 
             this._target = target;
-        } else if ((structures.contains(this._target.type)) && (this._target[name])) {
-            var target = this._target;            
+        }
+        else if ((structures.contains(this._target.type)) && (this._target[name])) {
+            target = this._target;
             this._target = target[name];
 
             while (!this.peek('}')) {
@@ -260,7 +265,8 @@ function dasParser(das, dataset) {
             this.consume('}');
 
             this._target = target;
-        } else {
+        }
+        else {
             this._target.attributes[name] = this._metadata();
             this.consume('}');
         }
@@ -270,8 +276,9 @@ function dasParser(das, dataset) {
         var output = {};
         while (!this.peek('}')) {
             if (atomicTypes.contains(this.peek('\\w+').toLowerCase())) {
-                this._attribute(output);                
-            } else {
+                this._attribute(output);
+            }
+            else {
                 var name = this.consume('\\w+');
                 this.consume('{');
                 output[name] = this._metadata();
@@ -289,15 +296,17 @@ function dasParser(das, dataset) {
         while (!this.peek(';')) {
             var value = this.consume('".*?[^\\\\]"|[^;,]+');
 
-            if ((type.toLowerCase() == 'string') || 
-                (type.toLowerCase() == 'url')) {
+            if ((type.toLowerCase() === 'string') ||
+                (type.toLowerCase() === 'url')) {
                 value = pseudoSafeEval(value);
-            } else if (type.toLowerCase() == 'alias') {
+            }
+            else if (type.toLowerCase() === 'alias') {
                 var target, tokens;
                 if (value.match(/^\\./)) {
                     tokens = value.substring(1).split('.');
                     target = this.dataset;
-                } else {
+                }
+                else {
                     tokens = value.split('.');
                     target = this._target;
                 }
@@ -306,19 +315,24 @@ function dasParser(das, dataset) {
                     var token = tokens[i];
                     if (target[token]) {
                         target = target[token];
-                    } else if (target.array.name == token) {
+                    }
+                    else if (target.array.name === token) {
                         target = target.array;
-                    } else if (target.maps[token]) {
+                    }
+                    else if (target.maps[token]) {
                         target = target.maps[token];
-                    } else {
+                    }
+                    else {
                         target = target.attributes[token];
                     }
                     value = target;
                 }
-            } else {
-                if (value.toLowerCase() == 'nan') {
+            }
+            else {
+                if (value.toLowerCase() === 'nan') {
                     value = NaN;
-                } else {
+                }
+                else {
                     value = pseudoSafeEval(value);
                 }
             }
@@ -329,7 +343,7 @@ function dasParser(das, dataset) {
         }
         this.consume(';');
 
-        if (values.length == 1) {
+        if (values.length === 1) {
             values = values[0];
         }
 

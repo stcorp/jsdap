@@ -21,6 +21,7 @@ rules:
   no-console:
     - 1
 env:
+  amd: true
   browser: true
 globals:
   __DEV__: true
