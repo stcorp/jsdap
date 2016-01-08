@@ -138,45 +138,50 @@ function dapUnpacker(xdrdata, dapvar) {
         return out;
     };
 
-    var startPos = this._pos;
-
     this._unpack_byte = function() {
+        var startPos = this._pos;
         this._pos += 1; //Increment the byte counter
 
         return this._view.getUint8(startPos);
     };
 
     this._unpack_uint16 = function() {
+        var startPos = this._pos;
         this._pos += 2; //Increment the byte counter
 
         return this._view.getUint16(startPos);
     };
 
     this._unpack_uint32 = function() {
+        var startPos = this._pos;
         this._pos += 4; //Increment the byte counter
 
         return this._view.getUint32(startPos);
     };
 
     this._unpack_int16 = function() {
+        var startPos = this._pos;
         this._pos += 2; //Increment the byte counter
 
         return this._view.getInt16(startPos);
     };
 
     this._unpack_int32 = function() {
+        var startPos = this._pos;
         this._pos += 4; //Increment the byte counter
 
         return this._view.getInt32(startPos);
     };
 
     this._unpack_float32 = function() {
+        var startPos = this._pos;
         this._pos += 4; //Increment the byte counter
 
         return this._view.getFloat32(startPos);
     };
 
     this._unpack_float64 = function() {
+        var startPos = this._pos;
         this._pos += 8; //Increment the byte counter
 
         return this._view.getFloat64(startPos);
@@ -244,11 +249,11 @@ function getBuffer(data) {
 
 function bufferToArrayBuffer(buffer) {
     //Given a buffer created by getBuffer, create an ArrayBuffer
-    var arrayBuffer = new ArrayBuffer(buffer.length * 2);
+    var arrayBuffer = new ArrayBuffer(buffer.length);
     var dataView = new DataView(arrayBuffer);
 
     for (var i = 0; i < buffer.length; i++) {
-        dataView.setUint16(i * 2, buffer[i]);
+        dataView.setUint8(i, buffer[i]);
     }
 
     return arrayBuffer;
