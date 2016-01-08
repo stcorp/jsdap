@@ -1,14 +1,5 @@
 function proxyUrl(url, callback, binary) {
-    var xml;
-
-    // Mozilla/Safari/IE7+
-    if (window.XMLHttpRequest) {
-        xml = new XMLHttpRequest();
-    // IE6
-    }
-    else if (window.ActiveXObject) {
-        xml = new ActiveXObject('Microsoft.XMLHTTP');
-    }
+    var xml = new XMLHttpRequest();
 
     xml.open('GET', url, true);
     if (xml.overrideMimeType) {
@@ -22,9 +13,6 @@ function proxyUrl(url, callback, binary) {
         if (xml.readyState === 4) {
             if (!binary) {
                 callback(xml.responseText);
-            }
-            else if (IE_HACK) {
-                callback(BinaryToArray(xml.responseBody).toArray());
             }
             else {
                 callback(getBuffer(xml.responseText));
