@@ -35,6 +35,17 @@ Limitations
 Due to the XHR policy on not allowing cross-domain requests,
 you need a proxy to handle external datasets.
 
+Development
+===========
+
+Install the dev dependencies::
+
+    $ npm install
+
+Link eslint for Javascript linting::
+
+    $ ln -s --relative node_modules/eslint/bin/eslint.js ../bin/eslint
+
 License
 =======
 
