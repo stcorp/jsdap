@@ -251,10 +251,10 @@ function shl(a, b){
 function readBits(buffer, start, length) {
     if (start < 0 || length <= 0) return 0;
 
-    for(var offsetLeft = (start + length) % 8, offsetRight = start % 8, curByte = buffer.length - (start >> 3) - 1,
-        lastByte = buffer.length + ((-(start + length)) >> 3), diff = curByte - lastByte,
+    for(var offsetLeft, offsetRight = start % 8, curByte = buffer.length - (start >> 3) - 1,
+        lastByte = buffer.length + (-(start + length) >> 3), diff = curByte - lastByte,
         sum = ((buffer[ curByte ] >> offsetRight) & ((1 << (diff ? 8 - offsetRight : length)) - 1))
-        + (diff && offsetLeft ? (buffer[ lastByte++ ] & ((1 << offsetLeft) - 1))
+        + (diff && (offsetLeft = (start + length) % 8) ? (buffer[ lastByte++ ] & ((1 << offsetLeft) - 1))
         << (diff-- << 3) - offsetRight : 0); diff; sum += shl(buffer[ lastByte++ ], (diff-- << 3) - offsetRight));
     return sum;
 }
@@ -295,7 +295,7 @@ function decodeFloat(data, precisionBits, exponentBits) {
 
     do
         for(byteValue = buffer[ ++curByte ], startBit = precisionBits % 8 || 8, mask = 1 << startBit;
-            mask >>= 1; significand += 1, (byteValue & mask) && (significand / divisor), divisor *= 2);
+            mask >>= 1; (byteValue & mask) && (significand += 1 / divisor), divisor *= 2);
     while (precisionBits -= startBit);
 
     return exponent == (bias << 1) + 1 ? significand ? NaN : signal ? -Infinity : +Infinity
