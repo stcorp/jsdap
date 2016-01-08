@@ -33,7 +33,7 @@ function dapUnpacker(xdrdata, dapvar) {
         } else if (type == 'grid') {
             var out = [], tmp;
             dapvar = this.dapvar;
-            
+
             this.dapvar = dapvar.array;
             tmp = this.getValue();
             out.push(tmp);
@@ -116,7 +116,7 @@ function dapUnpacker(xdrdata, dapvar) {
         } else {
             out = out[0];
         }
-        
+
         return out;
     };
 
@@ -180,7 +180,7 @@ function dapUnpacker(xdrdata, dapvar) {
         var data = this._buf.slice(i, i+bytes);
         return decodeFloat(data, precision, exponent);
     };
- 
+
     this._unpack_float64 = function() {
         var precision = 52;
         var exponent = 11;
@@ -200,7 +200,7 @@ function dapUnpacker(xdrdata, dapvar) {
         }
         var padding = (4 - (count % 4)) % 4;
         this._pos = i + count + padding;
-        
+
         return out;
     };
 
@@ -222,7 +222,7 @@ function dapUnpacker(xdrdata, dapvar) {
             }
             out.push(str);
         }
-        
+
         return out;
     };
 }
@@ -278,7 +278,7 @@ function decodeInt(data, bytes, signed) {
     } else {
         integer = x;
     }
-    return integer; 
+    return integer;
 }
 
 
