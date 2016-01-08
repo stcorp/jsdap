@@ -210,7 +210,7 @@ function dapUnpacker(xdrdata, dapvar) {
             var str = '';
 
             for (var s = 0; s < n; s++) {
-                str += String.fromCharCode(this._unpack_uint16());
+                str += String.fromCharCode(this._unpack_byte());
             }
 
             strings.push(str);
