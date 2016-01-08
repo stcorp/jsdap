@@ -8,18 +8,22 @@ var START_OF_SEQUENCE = '\x5a\x00\x00\x00';
 
 
 function dapUnpacker(xdrdata, dapvar) {
-    this._buf = xdrdata;
+    this._buf = bufferToArrayBuffer(xdrdata); //Convert to an ArrayBuffer
+    this._view = new DataView(this._buf); //Get a view into the ArrayBuffer
+
     this.dapvar = dapvar;
 
-    this._pos = 0;
+    this._pos = 0; //Byte offset
 
     this.getValue = function() {
         var i = this._pos;
-        var type = this.dapvar.type.toLowerCase();
+        var dapvar = this.dapvar;
+        var type = dapvar.type.toLowerCase();
+        var out = [];
+        var tmp;
+        var mark;
 
-        if (type == 'structure' || type == 'dataset') {
-            var out = [], tmp;
-            dapvar = this.dapvar;
+        if (type === 'structure' || type === 'dataset') {
             for (var child in dapvar) {
                 if (dapvar[child].type) {
                     this.dapvar = dapvar[child];
@@ -27,14 +31,14 @@ function dapUnpacker(xdrdata, dapvar) {
                     out.push(tmp);
                 }
             }
+
             this.dapvar = dapvar;
+
             return out;
-
-        } else if (type == 'grid') {
-            var out = [], tmp;
-            dapvar = this.dapvar;
-
+        }
+        else if (type === 'grid') {
             this.dapvar = dapvar.array;
+
             tmp = this.getValue();
             out.push(tmp);
 
@@ -45,14 +49,17 @@ function dapUnpacker(xdrdata, dapvar) {
             }
 
             this.dapvar = dapvar;
-            return out;
 
-        } else if (type == 'sequence') {
-            var mark = this._unpack_uint32();
-            var out = [], struct, tmp;
+            return out;
+        }
+        else if (type === 'sequence') {
+            mark = this._unpack_uint32();
+
             dapvar = this.dapvar;
-            while (mark != 2768240640) {
-                struct = [];
+
+            while (mark !== 2768240640) {
+                var struct = [];
+
                 for (var child in dapvar) {
                     if (dapvar[child].type) {
                         this.dapvar = dapvar[child];
@@ -60,170 +67,153 @@ function dapUnpacker(xdrdata, dapvar) {
                         struct.push(tmp);
                     }
                 }
+
                 out.push(struct);
                 mark = this._unpack_uint32();
             }
+
             this.dapvar = dapvar;
+
             return out;
-        // This is a request for a base type variable inside a
-        // sequence.
-        } else if (this._buf.slice(i, i+4) == START_OF_SEQUENCE) {
-            var mark = this._unpack_uint32();
-            var out = [], tmp;
-            while (mark != 2768240640) {
+        }
+        else if (this._buf.slice(i, i+4) === START_OF_SEQUENCE) {
+            // This is a request for a base type variable inside a
+            // sequence.
+            mark = this._unpack_uint32();
+
+            while (mark !== 2768240640) {
                 tmp = this.getValue();
                 out.push(tmp);
                 mark = this._unpack_uint32();
             }
             return out;
         }
+        else {
+            //Numeric or string type
+            var n = 1;
 
-        var n = 1;
-        if (this.dapvar.shape.length) {
-            n = this._unpack_uint32();
-            if (type != 'url' && type != 'string') {
-                this._unpack_uint32();
-            }
-        }
+            if (this.dapvar.shape.length) {
+                n = this._unpack_uint32();
 
-        // Bytes?
-        var out;
-        if (type == 'byte') {
-            out = this._unpack_bytes(n);
-        // String?
-        } else if (type == 'url' || type == 'string') {
-            out = this._unpack_string(n);
-        } else {
-            out = [];
-            var func;
-            switch (type) {
-                case 'float32': func = '_unpack_float32'; break;
-                case 'float64': func = '_unpack_float64'; break;
-                case 'int'    : func = '_unpack_int32'; break;
-                case 'uint'   : func = '_unpack_uint32'; break;
-                case 'int16'  : func = '_unpack_int16'; break;
-                case 'uint16' : func = '_unpack_uint16'; break;
-                case 'int32'  : func = '_unpack_int32'; break;
-                case 'uint32' : func = '_unpack_uint32'; break;
+                if (type !== 'url' && type !== 'string') {
+                    this._unpack_uint32(); //Throw away a start?
+                }
             }
-            for (var i=0; i<n; i++) {
-                out.push(this[func]());
+
+            if (type === 'byte') {
+                out = this._unpack_bytes(n);
+            }
+            else if (type === 'url' || type === 'string') {
+                out = this._unpack_string(n);
+            }
+            else {
+                out = [];
+
+                var func;
+
+                switch (type) {
+                    case 'float32': func = '_unpack_float32'; break;
+                    case 'float64': func = '_unpack_float64'; break;
+                    case 'int'    : func = '_unpack_int32'; break;
+                    case 'uint'   : func = '_unpack_uint32'; break;
+                    case 'int16'  : func = '_unpack_int16'; break;
+                    case 'uint16' : func = '_unpack_uint16'; break;
+                    case 'int32'  : func = '_unpack_int32'; break;
+                    case 'uint32' : func = '_unpack_uint32'; break;
+                }
+
+                for (var i = 0; i < n; i++) {
+                    out.push(this[func]());
+                }
             }
         }
 
         if (this.dapvar.shape) {
             out = reshape(out, this.dapvar.shape);
-        } else {
+        }
+        else {
             out = out[0];
         }
 
         return out;
     };
 
-    this._unpack_byte = function() {
-        var bytes = 1;
-        var signed = false;
+    var startPos = this._pos;
 
-        var i = this._pos;
-        this._pos = i+bytes;
-        var data = this._buf.slice(i, i+bytes);
-        return decodeInt(data, bytes, signed);
+    this._unpack_byte = function() {
+        this._pos += 1; //Increment the byte counter
+
+        return this._view.getUint8(startPos);
     };
 
     this._unpack_uint16 = function() {
-        var bytes = 4;
-        var signed = false;
+        this._pos += 2; //Increment the byte counter
 
-        var i = this._pos;
-        this._pos = i+bytes;
-        var data = this._buf.slice(i, i+bytes);
-        return decodeInt(data, bytes, signed);
+        return this._view.getUint16(startPos);
     };
 
     this._unpack_uint32 = function() {
-        var bytes = 4;
-        var signed = false;
+        this._pos += 4; //Increment the byte counter
 
-        var i = this._pos;
-        this._pos = i+bytes;
-        var data = this._buf.slice(i, i+bytes);
-        return decodeInt(data, bytes, signed);
+        return this._view.getUint32(startPos);
     };
 
     this._unpack_int16 = function() {
-        var bytes = 4;
-        var signed = true;
+        this._pos += 2; //Increment the byte counter
 
-        var i = this._pos;
-        this._pos = i+bytes;
-        var data = this._buf.slice(i, i+bytes);
-        return decodeInt(data, bytes, signed);
+        return this._view.getInt16(startPos);
     };
 
     this._unpack_int32 = function() {
-        var bytes = 4;
-        var signed = true;
+        this._pos += 4; //Increment the byte counter
 
-        var i = this._pos;
-        this._pos = i+bytes;
-        var data = this._buf.slice(i, i+bytes);
-        return decodeInt(data, bytes, signed);
+        return this._view.getInt32(startPos);
     };
 
     this._unpack_float32 = function() {
-        var precision = 23;
-        var exponent = 8;
-        var bytes = 4;
+        this._pos += 4; //Increment the byte counter
 
-        var i = this._pos;
-        this._pos = i+bytes;
-        var data = this._buf.slice(i, i+bytes);
-        return decodeFloat(data, precision, exponent);
+        return this._view.getFloat32(startPos);
     };
 
     this._unpack_float64 = function() {
-        var precision = 52;
-        var exponent = 11;
-        var bytes = 8;
+        this._pos += 8; //Increment the byte counter
 
-        var i = this._pos;
-        this._pos = i+bytes;
-        var data = this._buf.slice(i, i+bytes);
-        return decodeFloat(data, precision, exponent);
+        return this._view.getFloat64(startPos);
     };
 
     this._unpack_bytes = function(count) {
-        var i = this._pos;
-        var out = [];
-        for (var c=0; c<count; c++) {
-            out.push(this._unpack_byte());
-        }
         var padding = (4 - (count % 4)) % 4;
-        this._pos = i + count + padding;
+        var bytes = [];
 
-        return out;
+        for (var c = 0; c < count; c++) {
+            bytes.push(this._unpack_byte());
+        }
+
+        this._pos += padding;
+
+        return bytes;
     };
 
     this._unpack_string = function(count) {
-        var out = [];
-        var n, i, j;
-        for (var c=0; c<count; c++) {
-            n = this._unpack_uint32();
-            i = this._pos;
-            var data = this._buf.slice(i, i+n);
+        var strings = [];
 
+        for (var c = 0; c < count; c++) {
+            var n = this._unpack_uint32(); //Length of the string
             var padding = (4 - (n % 4)) % 4;
-            this._pos = i + n + padding;
 
-            // convert back to string
             var str = '';
-            for (var i=0; i<n; i++) {
-                str += String.fromCharCode(data[i]);
+
+            for (var s = 0; s < n; s++) {
+                str += String.fromCharCode(this._unpack_uint16());
             }
-            out.push(str);
+
+            strings.push(str);
+
+            this._pos += padding;
         }
 
-        return out;
+        return strings;
     };
 }
 
@@ -242,65 +232,26 @@ function reshape(array, shape) {
 }
 
 
-function shl(a, b){
-    for(++b; --b; a = ((a %= 0x7fffffff + 1) & 0x40000000) == 0x40000000 ? a * 2 : (a - 0x40000000) * 2 + 0x7fffffff + 1);
-    return a;
-}
-
-
-function readBits(buffer, start, length) {
-    if (start < 0 || length <= 0) return 0;
-
-    for(var offsetLeft, offsetRight = start % 8, curByte = buffer.length - (start >> 3) - 1,
-        lastByte = buffer.length + (-(start + length) >> 3), diff = curByte - lastByte,
-        sum = ((buffer[ curByte ] >> offsetRight) & ((1 << (diff ? 8 - offsetRight : length)) - 1))
-        + (diff && (offsetLeft = (start + length) % 8) ? (buffer[ lastByte++ ] & ((1 << offsetLeft) - 1))
-        << (diff-- << 3) - offsetRight : 0); diff; sum += shl(buffer[ lastByte++ ], (diff-- << 3) - offsetRight));
-    return sum;
-}
-
-
 function getBuffer(data) {
+    //Converts data to an array of chars
     var b = new Array(data.length);
-    for (var i=0; i<data.length; i++) {
+    for (var i = 0; i < data.length; i++) {
         b[i] = data.charCodeAt(i) & 0xff;
     }
     return b;
 }
 
 
-function decodeInt(data, bytes, signed) {
-    var x = readBits(data, 0, bytes*8);
-    var max = Math.pow(2, bytes*8);
-    var integer;
-    if (signed && x >= (max / 2)) {
-        integer = x - max;
-    } else {
-        integer = x;
+function bufferToArrayBuffer(buffer) {
+    //Given a buffer created by getBuffer, create an ArrayBuffer
+    var arrayBuffer = new ArrayBuffer(buffer.length * 2);
+    var dataView = new DataView(arrayBuffer);
+
+    for (var i = 0; i < buffer.length; i++) {
+        dataView.setUint16(i * 2, buffer[i]);
     }
-    return integer;
-}
 
-
-function decodeFloat(data, precisionBits, exponentBits) {
-    var buffer = data;
-
-    var bias = Math.pow(2, exponentBits - 1) - 1;
-    var signal = readBits(buffer, precisionBits + exponentBits, 1);
-    var exponent = readBits(buffer, precisionBits, exponentBits);
-    var significand = 0;
-    var divisor = 2;
-    var curByte = buffer.length + (-precisionBits >> 3) - 1;
-    var byteValue, startBit, mask;
-
-    do
-        for(byteValue = buffer[ ++curByte ], startBit = precisionBits % 8 || 8, mask = 1 << startBit;
-            mask >>= 1; (byteValue & mask) && (significand += 1 / divisor), divisor *= 2);
-    while (precisionBits -= startBit);
-
-    return exponent == (bias << 1) + 1 ? significand ? NaN : signal ? -Infinity : +Infinity
-        : (1 + signal * -2) * (exponent || significand ? !exponent ? Math.pow(2, -bias + 1) * significand
-        : Math.pow(2, exponent - bias) * (1 + significand) : 0);
+    return arrayBuffer;
 }
 
 
