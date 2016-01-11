@@ -25,6 +25,7 @@ String.prototype.rtrim = function() {
 
 function pseudoSafeEval(str) {
     //If it's a string, return a string, otherwise evaluate to a number
+    //TODO: Is this correct? Should we try and eval, and if it fails, return the string?
     if (str.indexOf('"') !== -1) {
         return str;
     }
