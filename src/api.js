@@ -51,7 +51,7 @@ function loadData(url, callback, proxy) {
 
         var dds = ''; //The DDS string
 
-        while (byteIndex < dods.byteLength) {
+        while (byteIndex < view.byteLength) {
             dds += String.fromCharCode(view.getUint8(byteIndex));
 
             if (dds.indexOf(dataStart) !== -1) {
@@ -62,7 +62,7 @@ function loadData(url, callback, proxy) {
         }
 
         dds = dds.substr(0, dds.length - dataStart.length); //Remove the start of data string '\nData:\n'
-        dods = dods.slice(byteIndex, dods.length - 1); //Split off the DDS data
+        dods = dods.slice(byteIndex + 1); //Split off the DDS data
 
         var dapvar = new ddsParser(dds).parse();
         var data = new dapUnpacker(dods, dapvar).getValue();
