@@ -294,16 +294,25 @@ function dasParser(das, dataset) {
         var type = this.consume('\\w+');
         var name = this.consume('\\w+');
 
+        var value;
         var values = [];
-        while (!this.peek(';')) {
-            var value = this.consume('".*?[^\\\\]"|[^;,]+');
 
-            if ((type.toLowerCase() === 'string') ||
-                (type.toLowerCase() === 'url')) {
+        while (!this.peek(';')) {
+            if (type.toLowerCase() === 'string') {
+                value = this.consume('".*?[^\\\\]+"');
+
+                value = pseudoSafeEval(value);
+            }
+            else if (type.toLowerCase() === 'url') {
+                value = this.consume('".*?[^\\\\]"|[^;,]+');
+
                 value = pseudoSafeEval(value);
             }
             else if (type.toLowerCase() === 'alias') {
                 var target, tokens;
+
+                value = this.consume('".*?[^\\\\]"|[^;,]+');
+
                 if (value.match(/^\\./)) {
                     tokens = value.substring(1).split('.');
                     target = this.dataset;
@@ -331,6 +340,8 @@ function dasParser(das, dataset) {
                 }
             }
             else {
+                value = this.consume('".*?[^\\\\]"|[^;,]+');
+
                 if (value.toLowerCase() === 'nan') {
                     value = NaN;
                 }
@@ -338,7 +349,9 @@ function dasParser(das, dataset) {
                     value = pseudoSafeEval(value);
                 }
             }
+
             values.push(value);
+
             if (this.peek(',')) {
                 this.consume(',');
             }
