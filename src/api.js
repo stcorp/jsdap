@@ -45,13 +45,24 @@ function loadData(url, callback, proxy) {
     if (proxy) url = proxy + '?url=' + encodeURIComponent(url);
 
     proxyUrl(url, function(dods) {
-        var dds = '';
+        var dataStart = '\nData:\n';
+        var view = new DataView(dods);
+        var byteIndex = 0;
 
-        while (!dds.match(/\nData:\n$/)) {
-            dds += String.fromCharCode(dods.splice(0, 1));
+        var dds = ''; //The DDS string
+
+        while (byteIndex < dods.byteLength) {
+            dds += String.fromCharCode(view.getUint8(byteIndex));
+
+            if (dds.indexOf(dataStart) !== -1) {
+                break;
+            }
+
+            byteIndex += 1;
         }
 
-        dds = dds.substr(0, dds.length-7);
+        dds = dds.substr(0, dds.length - dataStart.length); //Remove the start of data string '\nData:\n'
+        dods = dods.slice(byteIndex, dods.length - 1); //Split off the DDS data
 
         var dapvar = new ddsParser(dds).parse();
         var data = new dapUnpacker(dods, dapvar).getValue();

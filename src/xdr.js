@@ -8,7 +8,7 @@ var START_OF_SEQUENCE = '\x5a\x00\x00\x00';
 
 
 function dapUnpacker(xdrdata, dapvar) {
-    this._buf = bufferToArrayBuffer(xdrdata); //Convert to an ArrayBuffer
+    this._buf = xdrdata;
     this._view = new DataView(this._buf); //Get a view into the ArrayBuffer
 
     this.dapvar = dapvar;
@@ -238,22 +238,12 @@ function reshape(array, shape) {
 
 
 function getBuffer(data) {
-    //Converts data to an array of chars
-    var b = new Array(data.length);
-    for (var i = 0; i < data.length; i++) {
-        b[i] = data.charCodeAt(i) & 0x00ff;
-    }
-    return b;
-}
-
-
-function bufferToArrayBuffer(buffer) {
-    //Given a buffer created by getBuffer, create an ArrayBuffer
-    var arrayBuffer = new ArrayBuffer(buffer.length);
+    //Converts data to an ArrayBuffer
+    var arrayBuffer = new ArrayBuffer(data.length);
     var dataView = new DataView(arrayBuffer);
 
-    for (var i = 0; i < buffer.length; i++) {
-        dataView.setUint8(i, buffer[i]);
+    for (var i = 0; i < data.length; i++) {
+        dataView.setUint8(i, data.charCodeAt(i) & 0x00ff);
     }
 
     return arrayBuffer;
