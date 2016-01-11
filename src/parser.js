@@ -292,14 +292,14 @@ function dasParser(das, dataset) {
 
     this._attribute = function(object) {
         var type = this.consume('\\w+');
-        var name = this.consume('\\w+');
+        var name = this.consume('\\b[a-zA-Z0-9_-]+\\b');
 
         var value;
         var values = [];
 
         while (!this.peek(';')) {
             if (type.toLowerCase() === 'string') {
-                value = this.consume('".*?[^\\\\]+"');
+                value = this.consume('".*?[^\\\"]*"');
 
                 value = pseudoSafeEval(value);
             }
