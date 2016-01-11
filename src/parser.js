@@ -24,12 +24,13 @@ String.prototype.rtrim = function() {
 
 
 function pseudoSafeEval(str) {
-    if (/^[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]*$/.test(str.
-            replace(/\\./g, '@').
-            replace(/"[^"\\\n\r]*"/g, ''))) {
+    //If it's a string, return a string, otherwise evaluate to a number
+    if (str.indexOf('"') !== -1) {
+        return str;
+    }
+    else {
         return eval('(' + str + ')');
     }
-    return str;
 }
 
 
