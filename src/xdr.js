@@ -241,7 +241,7 @@ function getBuffer(data) {
     //Converts data to an array of chars
     var b = new Array(data.length);
     for (var i = 0; i < data.length; i++) {
-        b[i] = data.charCodeAt(i) & 0xff;
+        b[i] = data.charCodeAt(i) & 0x00ff;
     }
     return b;
 }
