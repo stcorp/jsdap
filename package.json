@@ -1,22 +1,25 @@
 {
   "name": "jsdap",
-  "version": "2.3.1",
+  "version": "3.0.0",
   "description": "",
-  "private": true,
-  "main": "src/api.js",
-  "dependencies": {},
-  "devDependencies": {
-		"eslint": "^1.7.3",
-    "uglifyjs": "^2.4.10"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@bitbucket.org:jetfuse/jsdap.git"
   },
   "author": "",
   "license": "",
-  "homepage": "https://bitbucket.org/jetfuse/jsdap"
+  "homepage": "https://bitbucket.org/jetfuse/jsdap",
+  "private": true,
+  "main": "jsdap.js",
+  "scripts": {
+    "build": "npm run beautify && npm run minify",
+		"beautify": "uglifyjs src/header.js src/parser.js src/xdr.js src/api.js -b -o jsdap.js",
+		"minify": "uglifyjs src/header.js src/parser.js src/xdr.js src/api.js -o jsdap.min.js",
+    "prepublish": "npm run build"
+  },
+  "dependencies": {},
+  "devDependencies": {
+		"eslint": "^1.7.3",
+    "uglify-js": "^2.6.1"
+  }
 }

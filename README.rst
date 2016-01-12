@@ -46,6 +46,11 @@ Link eslint for Javascript linting::
 
     $ ln -s --relative node_modules/eslint/bin/eslint.js ../bin/eslint
 
+
+Build the library, and minified library, using npm::
+
+    $ npm run build
+
 License
 =======
 
