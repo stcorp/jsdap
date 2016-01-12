@@ -1,8 +1,3 @@
-// Lots of code from http://jsfromhell.com/classes/binary-parser
-//    Jonas Raoni Soares Silva
-//    http://jsfromhell.com/classes/binary-parser [v1.0]
-
-
 var END_OF_SEQUENCE = '\xa5\x00\x00\x00';
 var START_OF_SEQUENCE = '\x5a\x00\x00\x00';
 
