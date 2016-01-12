@@ -287,5 +287,45 @@ describe('parser functions', function() {
 
             expect(result).toEqual(datasetDapType);
         });
+
+        it('handles sequence members', function() {
+            var testDDS = 'Dataset {Sequence {String symbol; String date; Float64 price;} TEST;} test%2Enc;';
+
+            var datasetDapType = new dapType('Dataset', {});
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var symbolDapType = new dapType('String', {});
+            symbolDapType.name = 'symbol';
+            symbolDapType.dimensions = [];
+            symbolDapType.shape = [];
+            symbolDapType.id = 'TEST.symbol';
+
+            var dateDapType = new dapType('String', {});
+            dateDapType.name = 'date';
+            dateDapType.dimensions = [];
+            dateDapType.shape = [];
+            dateDapType.id = 'TEST.date';
+
+            var priceDapType = new dapType('Float64', {});
+            priceDapType.name = 'price';
+            priceDapType.dimensions = [];
+            priceDapType.shape = [];
+            priceDapType.id = 'TEST.price';
+
+            var sequenceDapType = new dapType('Sequence', {});
+            sequenceDapType.name = 'TEST';
+            sequenceDapType.symbol = symbolDapType;
+            sequenceDapType.date = dateDapType;
+            sequenceDapType.price = priceDapType;
+            sequenceDapType.id = 'TEST';
+
+            datasetDapType.TEST = sequenceDapType;
+
+            var result = new ddsParser(testDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
     });
 });
