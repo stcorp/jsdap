@@ -241,5 +241,51 @@ describe('parser functions', function() {
 
             expect(result).toEqual(datasetDapType);
         });
+
+        it('handles grid members', function() {
+            var testDDS = 'Dataset {Grid {Array: Float32 TEST[dim1 = 12][dim2 = 90][dim3 = 180]; Maps: Float64 dim1[dim1 = 12]; Float64 dim2[dim2 = 90]; Float64 dim3[dim3 = 180];} TEST;} test%2Enc;';
+
+            var datasetDapType = new dapType('Dataset', {});
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var arrayDapType = new dapType('Float32', {});
+            arrayDapType.name = 'TEST';
+            arrayDapType.dimensions = ['dim1', 'dim2', 'dim3'];
+            arrayDapType.shape = [12, 90, 180];
+            arrayDapType.id = 'TEST.TEST';
+
+            var dim1DapType = new dapType('Float64', {});
+
+            dim1DapType.name = 'dim1';
+            dim1DapType.dimensions = ['dim1'];
+            dim1DapType.shape = [12];
+
+            var dim2DapType = new dapType('Float64', {});
+
+            dim2DapType.name = 'dim2';
+            dim2DapType.dimensions = ['dim2'];
+            dim2DapType.shape = [90];
+
+            var dim3DapType = new dapType('Float64', {});
+
+            dim3DapType.name = 'dim3';
+            dim3DapType.dimensions = ['dim3'];
+            dim3DapType.shape = [180];
+
+            var testDapType = new dapType('Grid', {});
+
+            testDapType.name = 'TEST';
+            testDapType.array = arrayDapType;
+            testDapType.maps = {dim1: dim1DapType, dim2: dim2DapType, dim3: dim3DapType};
+            testDapType.id = 'TEST';
+
+            datasetDapType.TEST = testDapType;
+
+            var result = new ddsParser(testDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
     });
 });
