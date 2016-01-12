@@ -367,5 +367,235 @@ describe('parser functions', function() {
 
             expect(result).toEqual(datasetDapType);
         });
+
+        it('handles int members', function() {
+            var testDAS = 'Attributes {TEST { Int test_attr 959; }}';
+
+            var datasetDapType = new dapType('Dataset');
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var testDapType = new dapType('Byte');
+            testDapType.attributes = {test_attr: 959};
+
+            testDapType.name = 'TEST';
+            testDapType.dimensions = [];
+            testDapType.shape = [];
+            testDapType.id = 'TEST';
+
+            datasetDapType.TEST = testDapType;
+
+            var result = new dasParser(testDAS, testParsedDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
+
+        it('handles uint members', function() {
+            var testDAS = 'Attributes {TEST { Uint test_attr 911; }}';
+
+            var datasetDapType = new dapType('Dataset');
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var testDapType = new dapType('Byte');
+            testDapType.attributes = {test_attr: 911};
+
+            testDapType.name = 'TEST';
+            testDapType.dimensions = [];
+            testDapType.shape = [];
+            testDapType.id = 'TEST';
+
+            datasetDapType.TEST = testDapType;
+
+            var result = new dasParser(testDAS, testParsedDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
+
+        it('handles int16 members', function() {
+            var testDAS = 'Attributes {TEST { Int16 test_attr -10289; }}';
+
+            var datasetDapType = new dapType('Dataset');
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var testDapType = new dapType('Byte');
+            testDapType.attributes = {test_attr: -10289};
+
+            testDapType.name = 'TEST';
+            testDapType.dimensions = [];
+            testDapType.shape = [];
+            testDapType.id = 'TEST';
+
+            datasetDapType.TEST = testDapType;
+
+            var result = new dasParser(testDAS, testParsedDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
+
+        it('handles uint16 members', function() {
+            var testDAS = 'Attributes {TEST { Uint16 test_attr 10289; }}';
+
+            var datasetDapType = new dapType('Dataset');
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var testDapType = new dapType('Byte');
+            testDapType.attributes = {test_attr: 10289};
+
+            testDapType.name = 'TEST';
+            testDapType.dimensions = [];
+            testDapType.shape = [];
+            testDapType.id = 'TEST';
+
+            datasetDapType.TEST = testDapType;
+
+            var result = new dasParser(testDAS, testParsedDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
+
+        it('handles int32 members', function() {
+            var testDAS = 'Attributes {TEST { Int32 test_attr -124765; }}';
+
+            var datasetDapType = new dapType('Dataset');
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var testDapType = new dapType('Byte');
+            testDapType.attributes = {test_attr: -124765};
+
+            testDapType.name = 'TEST';
+            testDapType.dimensions = [];
+            testDapType.shape = [];
+            testDapType.id = 'TEST';
+
+            datasetDapType.TEST = testDapType;
+
+            var result = new dasParser(testDAS, testParsedDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
+
+        it('handles uint32 members', function() {
+            var testDAS = 'Attributes {TEST { Byte test_attr 124765; }}';
+
+            var datasetDapType = new dapType('Dataset');
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var testDapType = new dapType('Byte');
+            testDapType.attributes = {test_attr: 124765};
+
+            testDapType.name = 'TEST';
+            testDapType.dimensions = [];
+            testDapType.shape = [];
+            testDapType.id = 'TEST';
+
+            datasetDapType.TEST = testDapType;
+
+            var result = new dasParser(testDAS, testParsedDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
+
+        it('handles float32 members', function() {
+            var testDAS = 'Attributes {TEST { Float32 test_attr -1.2e34; }}';
+
+            var datasetDapType = new dapType('Dataset');
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var testDapType = new dapType('Byte');
+            testDapType.attributes = {test_attr: -1.2e34};
+
+            testDapType.name = 'TEST';
+            testDapType.dimensions = [];
+            testDapType.shape = [];
+            testDapType.id = 'TEST';
+
+            datasetDapType.TEST = testDapType;
+
+            var result = new dasParser(testDAS, testParsedDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
+
+        it('handles float64 members', function() {
+            var testDAS = 'Attributes {TEST { Float64 test_attr 1e32; }}';
+
+            var datasetDapType = new dapType('Dataset');
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var testDapType = new dapType('Byte');
+            testDapType.attributes = {test_attr: 1e32};
+
+            testDapType.name = 'TEST';
+            testDapType.dimensions = [];
+            testDapType.shape = [];
+            testDapType.id = 'TEST';
+
+            datasetDapType.TEST = testDapType;
+
+            var result = new dasParser(testDAS, testParsedDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
+
+        it('handles string members', function() {
+            var testDAS = 'Attributes {TEST { String test_attr "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_"; }}';
+
+            var datasetDapType = new dapType('Dataset');
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var testDapType = new dapType('Byte');
+            testDapType.attributes = {test_attr: '"ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_"'};
+
+            testDapType.name = 'TEST';
+            testDapType.dimensions = [];
+            testDapType.shape = [];
+            testDapType.id = 'TEST';
+
+            datasetDapType.TEST = testDapType;
+
+            var result = new dasParser(testDAS, testParsedDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
+
+        it('handles url members', function() {
+            var testDAS = 'Attributes {TEST { Url test_attr "http://test.com"; }}';
+
+            var datasetDapType = new dapType('Dataset');
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var testDapType = new dapType('Byte');
+            testDapType.attributes = {test_attr: '"http://test.com"'};
+
+            testDapType.name = 'TEST';
+            testDapType.dimensions = [];
+            testDapType.shape = [];
+            testDapType.id = 'TEST';
+
+            datasetDapType.TEST = testDapType;
+
+            var result = new dasParser(testDAS, testParsedDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
     });
 });
