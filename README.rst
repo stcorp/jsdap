@@ -1,10 +1,9 @@
 A quick introduction
 ====================
 
-Jsdap is composed of 4 separate files: parser.js, xdr.js, api.js
-and vbscript.js.  If you run ``make``, they will be combined and
-compressed together with header.js into a single file jsdap.js,
-which should be used in your web applications.
+Jsdap is composed of 3 separate files: parser.js, xdr.js, and api.js.
+If you run ``npm run build``, they will be combined and made into both
+``jsdap.js`` and the minified ``jsdap.min.js``.
 
 The API is as simple as it gets::
 
