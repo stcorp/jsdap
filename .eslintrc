@@ -23,6 +23,9 @@ rules:
 env:
   amd: true
   browser: true
+  jasmine: true
 globals:
   __DEV__: true
 extends: 'eslint:recommended'
+plugins:
+  - jasmine
