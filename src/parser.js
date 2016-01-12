@@ -367,6 +367,7 @@ function dasParser(das, dataset) {
 }
 dasParser.prototype = new simpleParser;
 
-
-exports.ddsParser = ddsParser;
-exports.dasParser = dasParser;
+if (typeof exports !== 'undefined') {
+    exports.ddsParser = ddsParser;
+    exports.dasParser = dasParser;
+}

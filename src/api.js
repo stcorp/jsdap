@@ -71,6 +71,7 @@ function loadData(url, callback, proxy) {
     }, true);
 }
 
-
-exports.loadDataset = loadDataset;
-exports.loadData = loadData;
+if (typeof exports !== 'undefined') {
+    exports.loadDataset = loadDataset;
+    exports.loadData = loadData;
+}

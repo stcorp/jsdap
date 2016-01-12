@@ -250,5 +250,7 @@ function getBuffer(data) {
 }
 
 
-exports.getBuffer = getBuffer;
-exports.dapUnpacker = dapUnpacker;
+if (typeof exports !== 'undefined') {
+    exports.getBuffer = getBuffer;
+    exports.dapUnpacker = dapUnpacker;
+}
