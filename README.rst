@@ -51,6 +51,10 @@ Build the library, and minified library, using npm::
 
     $ npm run build
 
+Unit tests use the Karma test runner and test against Firefox and Chrome. They can be run using npm::
+
+    $ npm run test
+
 License
 =======
 
