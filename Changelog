@@ -1,5 +1,12 @@
+4.0.0 (Tue Dec 12 16:43:10 BRT 2016):
+    Added unit tests for DDS / DAS parsing.
+    Source now built using npm.
+    Removed hacks for IE.
+    DODS data now parsed using ArrayBuffers instead of bitwise operations.
+    DAS parser updated to allow semicolons in String members.
+
 1.0.0 (Wed Jun 17 10:31:46 BRT 2009):
-	Implemented vbscript hack so it works with IE.
+    Implemented vbscript hack so it works with IE.
 
 0.1.1 (Thu Oct  4 16:12:02 BRT 2007):
     Bug fix in .send() method.
