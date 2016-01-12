@@ -13,7 +13,7 @@
   "main": "jsdap.js",
   "scripts": {
     "build": "npm run beautify && npm run minify",
-		"beautify": "uglifyjs src/header.js src/parser.js src/xdr.js src/api.js -b -o jsdap.js",
+		"beautify": "uglifyjs src/header.js src/parser.js src/xdr.js src/api.js --comments all -b -o jsdap.js",
 		"minify": "uglifyjs src/header.js src/parser.js src/xdr.js src/api.js -o jsdap.min.js",
     "prepublish": "npm run build"
   },
