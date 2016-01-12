@@ -16,7 +16,7 @@
 		"beautify": "uglifyjs src/header.js src/parser.js src/xdr.js src/api.js --comments all -b -o jsdap.js",
 		"minify": "uglifyjs src/header.js src/parser.js src/xdr.js src/api.js -o jsdap.min.js",
     "prepublish": "npm run build",
-		"test": "npm run beautify && karma start test/karma.conf.js"
+		"test": "karma start test/karma.conf.js"
   },
   "dependencies": {},
   "devDependencies": {

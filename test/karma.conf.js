@@ -2,7 +2,7 @@ module.exports = function (config) {
     config.set({
         basePath: '../',
         files: [
-            'jsdap.js',
+            'src/*.js',
             'test/unit/*.js',
         ],
         exclude: [],
