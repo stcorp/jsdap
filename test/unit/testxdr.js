@@ -1,15 +1,15 @@
 describe('xdr functions', function() {
     describe('dap unpacker', function() {
-        function buildDODSBuffer(type, data) {
-            //Define some sizes in bytes
-            var UINT8_SIZE = 1; //Uint8 == Byte
-            var INT32_SIZE = 4;
-            var UINT32_SIZE = 4;
-            var INT16_SIZE = 2;
-            var UINT16_SIZE = 2;
-            var FLOAT32_SIZE = 4;
-            var FLOAT64_SIZE = 8;
+        //Define some sizes in bytes
+        var UINT8_SIZE = 1; //Uint8 == Byte
+        var INT32_SIZE = 4;
+        var UINT32_SIZE = 4;
+        var INT16_SIZE = 2;
+        var UINT16_SIZE = 2;
+        var FLOAT32_SIZE = 4;
+        var FLOAT64_SIZE = 8;
 
+        function buildDODSBuffer(type, data) {
             //Calculate the required buffer size
             var dataLength =  0;
 
@@ -218,6 +218,96 @@ describe('xdr functions', function() {
             var result = new dapUnpacker(testDODSBuffer, testDASVar).getValue();
 
             expect(result).toEqual('http://test.com');
+        });
+
+        it('should unpack a sequence', function() {
+            var END_OF_SEQUENCE_MARK = 2768240640;
+
+            var sequenceDASVar = buildDASVar('Sequence', []);
+            var DASchild1 = buildDASVar('Int32', [3]);
+            var DASchild2 = buildDASVar('Float64', [3]);
+
+            sequenceDASVar.CHILD1 = DASchild1;
+            sequenceDASVar.CHILD2 = DASchild2;
+
+            //A sequence starts and ends with a mark, marks are Uint32
+            //[MARK][CHILD1 DATA][CHILD2 DATA]...[END OF SEQUENCE MARK]
+
+            //Calculate the combined buffer length
+            //2 marks, 3 int 32, child 1 member count, child 1 start, 3 float 64, child 2 member count, child 2 start
+            var sequenceBufferLength = 2 * UINT32_SIZE + 3 * UINT32_SIZE + 1 * UINT32_SIZE + 1 * UINT32_SIZE + 3 * FLOAT64_SIZE + 1 * UINT32_SIZE + 1 * UINT32_SIZE;
+
+            //Build the sequence buffer
+            var sequenceBuffer = new ArrayBuffer(sequenceBufferLength);
+            var sequenceView = new DataView(sequenceBuffer);
+
+            //Set up our buffer writer
+            var bufferIndex = 0;
+
+            function _writeValueToOutputBuffer(valueType, value) {
+                if (valueType === 'Byte') {
+                    sequenceView.setUint8(bufferIndex, value);
+                    bufferIndex += UINT8_SIZE;
+                }
+                else if (valueType === 'Int32' || valueType === 'Int') {
+                    sequenceView.setInt32(bufferIndex, value);
+                    bufferIndex += INT32_SIZE;
+                }
+                else if (valueType === 'Uint32' || valueType === 'Uint') {
+                    sequenceView.setUint32(bufferIndex, value);
+                    bufferIndex += UINT32_SIZE;
+                }
+                else if (valueType === 'Int16') {
+                    sequenceView.setInt16(bufferIndex, value);
+                    bufferIndex += INT16_SIZE;
+                }
+                else if (valueType === 'Uint16') {
+                    sequenceView.setUint16(bufferIndex, value);
+                    bufferIndex += INT16_SIZE;
+                }
+                else if (valueType === 'Float32') {
+                    sequenceView.setFloat32(bufferIndex, value);
+                    bufferIndex += FLOAT32_SIZE;
+                }
+                else if (valueType === 'Float64') {
+                    sequenceView.setFloat64(bufferIndex, value);
+                    bufferIndex += FLOAT64_SIZE;
+                }
+                else if (valueType === 'String' || valueType === 'Url') {
+                    //Write the length
+                    _writeValueToOutputBuffer('Uint32', value.length);
+
+                    console.log('string length: ', value.length);
+
+                    for (var charIndex = 0; charIndex < value.length; charIndex++) {
+                        _writeValueToOutputBuffer('Byte', value.charCodeAt(charIndex) & 0x00ff);
+                    }
+                }
+            }
+
+            //Write the start marker
+            _writeValueToOutputBuffer('Uint32', 0);
+
+            //Write child 1 data
+            _writeValueToOutputBuffer('Uint32', 3); //Number of int32 to follow
+            _writeValueToOutputBuffer('Uint32', 0); //Data start
+            _writeValueToOutputBuffer('Int32', 11);
+            _writeValueToOutputBuffer('Int32', 12);
+            _writeValueToOutputBuffer('Int32', 13);
+
+            //Child 2 data
+            _writeValueToOutputBuffer('Uint32', 3); //Number of floats to follow
+            _writeValueToOutputBuffer('Uint32', 0); //Data start
+            _writeValueToOutputBuffer('Float64', 1);
+            _writeValueToOutputBuffer('Float64', 2);
+            _writeValueToOutputBuffer('Float64', 3);
+
+            //End of sequence marker
+            _writeValueToOutputBuffer('Uint32', END_OF_SEQUENCE_MARK);
+
+            var result = new dapUnpacker(sequenceBuffer, sequenceDASVar).getValue();
+
+            expect(result).toEqual([[[11, 12, 13], [1, 2, 3]]]);
         });
     });
 
