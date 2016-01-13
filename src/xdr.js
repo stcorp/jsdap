@@ -43,9 +43,11 @@ function dapUnpacker(xdrdata, dapvar) {
             out.push(tmp);
 
             for (var map in dapvar.maps) {
-                this.dapvar = dapvar.maps[map];
-                tmp = this.getValue();
-                out.push(tmp);
+                if (dapvar.maps[map].type) {
+                    this.dapvar = dapvar.maps[map];
+                    tmp = this.getValue();
+                    out.push(tmp);
+                }
             }
 
             this.dapvar = dapvar;
