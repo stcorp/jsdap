@@ -220,6 +220,95 @@ describe('xdr functions', function() {
             expect(result).toEqual('http://test.com');
         });
 
+        it('should unpack a grid', function() {
+            var gridDASVar = buildDASVar('Grid', []);
+            var DASarray = buildDASVar('Float64', [2, 3]);
+            var DASchild1 = buildDASVar('Int32', [2]);
+            var DASchild2 = buildDASVar('Int32', [3]);
+
+            gridDASVar.array = DASarray;
+            gridDASVar.maps = [DASchild1, DASchild2];
+
+            //Calculate the combined buffer length
+            //Array member count, array start,  6 Float 64 array members, map1 member count, map1 start, 2 int32 map1 members, map2 member count, map2 start, 3 map2 members
+            var gridBufferLength = 1 * UINT32_SIZE + 1 * UINT32_SIZE + 6 * FLOAT64_SIZE + 1 * UINT32_SIZE + 1 * UINT32_SIZE + 2 * UINT32_SIZE + 1 * UINT32_SIZE + 1 * UINT32_SIZE + 3 * UINT32_SIZE;
+
+            //Build the sequence buffer
+            var gridBuffer = new ArrayBuffer(gridBufferLength);
+            var gridView = new DataView(gridBuffer);
+
+            //Set up our buffer writer
+            var bufferIndex = 0;
+
+            function _writeValueToOutputBuffer(valueType, value) {
+                if (valueType === 'Byte') {
+                    gridView.setUint8(bufferIndex, value);
+                    bufferIndex += UINT8_SIZE;
+                }
+                else if (valueType === 'Int32' || valueType === 'Int') {
+                    gridView.setInt32(bufferIndex, value);
+                    bufferIndex += INT32_SIZE;
+                }
+                else if (valueType === 'Uint32' || valueType === 'Uint') {
+                    gridView.setUint32(bufferIndex, value);
+                    bufferIndex += UINT32_SIZE;
+                }
+                else if (valueType === 'Int16') {
+                    gridView.setInt16(bufferIndex, value);
+                    bufferIndex += INT16_SIZE;
+                }
+                else if (valueType === 'Uint16') {
+                    gridView.setUint16(bufferIndex, value);
+                    bufferIndex += INT16_SIZE;
+                }
+                else if (valueType === 'Float32') {
+                    gridView.setFloat32(bufferIndex, value);
+                    bufferIndex += FLOAT32_SIZE;
+                }
+                else if (valueType === 'Float64') {
+                    gridView.setFloat64(bufferIndex, value);
+                    bufferIndex += FLOAT64_SIZE;
+                }
+                else if (valueType === 'String' || valueType === 'Url') {
+                    //Write the length
+                    _writeValueToOutputBuffer('Uint32', value.length);
+
+                    console.log('string length: ', value.length);
+
+                    for (var charIndex = 0; charIndex < value.length; charIndex++) {
+                        _writeValueToOutputBuffer('Byte', value.charCodeAt(charIndex) & 0x00ff);
+                    }
+                }
+            }
+
+            //Write gridded data
+            _writeValueToOutputBuffer('Uint32', 6); //Number of float64 to follow
+            _writeValueToOutputBuffer('Uint32', 0); //Data start
+            _writeValueToOutputBuffer('Float64', 1.1);
+            _writeValueToOutputBuffer('Float64', 1.2);
+            _writeValueToOutputBuffer('Float64', 1.3);
+            _writeValueToOutputBuffer('Float64', 2.1);
+            _writeValueToOutputBuffer('Float64', 2.2);
+            _writeValueToOutputBuffer('Float64', 2.3);
+
+            //Map 1 data
+            _writeValueToOutputBuffer('Uint32', 2); //Number of int32 to follow
+            _writeValueToOutputBuffer('Uint32', 0); //Data start
+            _writeValueToOutputBuffer('Int32', 1);
+            _writeValueToOutputBuffer('Int32', 2);
+
+            //Map 2 data
+            _writeValueToOutputBuffer('Uint32', 3); //Number of int32 to follow
+            _writeValueToOutputBuffer('Uint32', 0); //Data start
+            _writeValueToOutputBuffer('Int32', 11);
+            _writeValueToOutputBuffer('Int32', 22);
+            _writeValueToOutputBuffer('Int32', 33);
+
+            var result = new dapUnpacker(gridBuffer, gridDASVar).getValue();
+
+            expect(result).toEqual([[[1.1, 1.2, 1.3], [2.1, 2.2, 2.3]], [1, 2], [11, 22, 33]]);
+        });
+
         it('should unpack a sequence', function() {
             var END_OF_SEQUENCE_MARK = 2768240640;
 
