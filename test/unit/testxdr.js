@@ -1,6 +1,6 @@
 describe('xdr functions', function() {
     describe('dap unpacker', function() {
-        function buildDODSBuffer(dds, type, data) {
+        function buildDODSBuffer(type, data) {
             //Define some sizes in bytes
             var UINT8_SIZE = 1; //Uint8 == Byte
             var INT32_SIZE = 4;
@@ -11,7 +11,6 @@ describe('xdr functions', function() {
             var FLOAT64_SIZE = 8;
 
             //Calculate the required buffer size
-            //var dataLength = (dds.length * UINT8_SIZE) + (DATA_START_STRING.length * UINT8_SIZE);
             var dataLength =  0;
 
             if (data.length > 1) {
@@ -124,9 +123,8 @@ describe('xdr functions', function() {
         }
 
         it('should unpack a byte', function() {
-            var testDDS = 'Dataset {Byte TEST[TEST = 2];} test%2Enc;';
             var testDASVar = buildDASVar('Byte', ['TEST'], [2]);
-            var testDODSBuffer = buildDODSBuffer(testDDS, 'Byte', [0x00, 0xff]);
+            var testDODSBuffer = buildDODSBuffer('Byte', [0x00, 0xff]);
 
             var result = new dapUnpacker(testDODSBuffer, testDASVar).getValue();
 
@@ -134,9 +132,8 @@ describe('xdr functions', function() {
         });
 
         it('should unpack an int', function() {
-            var testDDS = 'Dataset {Int TEST[TEST = 2];} test%2Enc;';
             var testDASVar = buildDASVar('Int', ['TEST'], [2]);
-            var testDODSBuffer = buildDODSBuffer(testDDS, 'Int', [Math.pow(2, 31) - 1, -Math.pow(2, 31)]); //Highest most bit is sign bit
+            var testDODSBuffer = buildDODSBuffer('Int', [Math.pow(2, 31) - 1, -Math.pow(2, 31)]); //Highest most bit is sign bit
 
             var result = new dapUnpacker(testDODSBuffer, testDASVar).getValue();
 
@@ -144,9 +141,8 @@ describe('xdr functions', function() {
         });
 
         it('should unpack an uint', function() {
-            var testDDS = 'Dataset {Uint TEST[TEST = 2];} test%2Enc;';
             var testDASVar = buildDASVar('Uint', ['TEST'], [2]);
-            var testDODSBuffer = buildDODSBuffer(testDDS, 'Uint', [0, Math.pow(2, 32) - 1]);
+            var testDODSBuffer = buildDODSBuffer('Uint', [0, Math.pow(2, 32) - 1]);
 
             var result = new dapUnpacker(testDODSBuffer, testDASVar).getValue();
 
@@ -154,9 +150,8 @@ describe('xdr functions', function() {
         });
 
         it('should unpack an int16', function() {
-            var testDDS = 'Dataset {Int16 TEST[TEST = 2];} test%2Enc;';
             var testDASVar = buildDASVar('Int16', ['TEST'], [2]);
-            var testDODSBuffer = buildDODSBuffer(testDDS, 'Int16', [Math.pow(2, 15) - 1, -Math.pow(2, 15)]); //Highest most bit is sign bit
+            var testDODSBuffer = buildDODSBuffer('Int16', [Math.pow(2, 15) - 1, -Math.pow(2, 15)]); //Highest most bit is sign bit
 
             var result = new dapUnpacker(testDODSBuffer, testDASVar).getValue();
 
@@ -164,9 +159,8 @@ describe('xdr functions', function() {
         });
 
         it('should unpack an uint16', function() {
-            var testDDS = 'Dataset {Uint16 TEST[TEST = 2];} test%2Enc;';
             var testDASVar = buildDASVar('Uint16', ['TEST'], [2]);
-            var testDODSBuffer = buildDODSBuffer(testDDS, 'Uint16', [0, -Math.pow(2, 16) - 1]); //Highest most bit is sign bit
+            var testDODSBuffer = buildDODSBuffer('Uint16', [0, -Math.pow(2, 16) - 1]); //Highest most bit is sign bit
 
             var result = new dapUnpacker(testDODSBuffer, testDASVar).getValue();
 
@@ -174,9 +168,8 @@ describe('xdr functions', function() {
         });
 
         it('should unpack an int32', function() {
-            var testDDS = 'Dataset {Int32 TEST[TEST = 2];} test%2Enc;';
             var testDASVar = buildDASVar('Int32', ['TEST'], [2]);
-            var testDODSBuffer = buildDODSBuffer(testDDS, 'Int32', [Math.pow(2, 31) - 1, -Math.pow(2, 31)]); //Highest most bit is sign bit
+            var testDODSBuffer = buildDODSBuffer('Int32', [Math.pow(2, 31) - 1, -Math.pow(2, 31)]); //Highest most bit is sign bit
 
             var result = new dapUnpacker(testDODSBuffer, testDASVar).getValue();
 
@@ -184,9 +177,8 @@ describe('xdr functions', function() {
         });
 
         it('should unpack an uint32', function() {
-            var testDDS = 'Dataset {Uint32 TEST[TEST = 2];} test%2Enc;';
             var testDASVar = buildDASVar('Uint32', ['TEST'], [2]);
-            var testDODSBuffer = buildDODSBuffer(testDDS, 'Uint32', [0, Math.pow(2, 32) - 1]);
+            var testDODSBuffer = buildDODSBuffer('Uint32', [0, Math.pow(2, 32) - 1]);
 
             var result = new dapUnpacker(testDODSBuffer, testDASVar).getValue();
 
@@ -194,9 +186,8 @@ describe('xdr functions', function() {
         });
 
         it('should unpack a float32', function() {
-            var testDDS = 'Dataset {Float32 TEST[TEST = 3];} test%2Enc;';
             var testDASVar = buildDASVar('Float32', ['TEST'], [3]);
-            var testDODSBuffer = buildDODSBuffer(testDDS, 'Float32', [Math.pow(2, -126), Math.pow(2, -149), (2 - Math.pow(2, -23)) * Math.pow(2, 127)]); //minimum positive normal, minimum positive denormal, and max value
+            var testDODSBuffer = buildDODSBuffer('Float32', [Math.pow(2, -126), Math.pow(2, -149), (2 - Math.pow(2, -23)) * Math.pow(2, 127)]); //minimum positive normal, minimum positive denormal, and max value
 
             var result = new dapUnpacker(testDODSBuffer, testDASVar).getValue();
 
@@ -204,9 +195,8 @@ describe('xdr functions', function() {
         });
 
         it('should unpack a float64', function() {
-            var testDDS = 'Dataset {Float64 TEST[TEST = 3];} test%2Enc;';
             var testDASVar = buildDASVar('Float64', ['TEST'], [3]);
-            var testDODSBuffer = buildDODSBuffer(testDDS, 'Float64', [Math.pow(2, -1022), Math.pow(2, -1074), (1 + (1 - Math.pow(2, -52))) * Math.pow(2, 1023)]); //minimum positive normal, minimum positive denormal, and max value
+            var testDODSBuffer = buildDODSBuffer('Float64', [Math.pow(2, -1022), Math.pow(2, -1074), (1 + (1 - Math.pow(2, -52))) * Math.pow(2, 1023)]); //minimum positive normal, minimum positive denormal, and max value
 
             var result = new dapUnpacker(testDODSBuffer, testDASVar).getValue();
 
@@ -214,9 +204,8 @@ describe('xdr functions', function() {
         });
 
         it('should unpack a string', function() {
-            var testDDS = 'Dataset {String TEST;} test%2Enc;';
             var testDASVar = buildDASVar('String', [], []);
-            var testDODSBuffer = buildDODSBuffer(testDDS, 'String', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_');
+            var testDODSBuffer = buildDODSBuffer('String', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_');
 
             var result = new dapUnpacker(testDODSBuffer, testDASVar).getValue();
 
@@ -224,9 +213,8 @@ describe('xdr functions', function() {
         });
 
         it('should unpack an url', function() {
-            var testDDS = 'Dataset {Url TEST;} test%2Enc;';
             var testDASVar = buildDASVar('Url', [], []);
-            var testDODSBuffer = buildDODSBuffer(testDDS, 'Url', 'http://test.com');
+            var testDODSBuffer = buildDODSBuffer('Url', 'http://test.com');
 
             var result = new dapUnpacker(testDODSBuffer, testDASVar).getValue();
 
