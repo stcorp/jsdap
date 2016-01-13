@@ -1,3 +1,7 @@
+4.1.0 (Wed Dec 13 16:46:11 BRT 2016):
+    Check for 'value' member on maps members of a dapvar.
+    More tests.
+
 4.0.0 (Tue Dec 12 16:43:10 BRT 2016):
     Added unit tests for DDS / DAS parsing.
     Source now built using npm.
