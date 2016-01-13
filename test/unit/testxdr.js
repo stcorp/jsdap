@@ -43,7 +43,7 @@ describe('xdr functions', function() {
             else if (type === 'Float64') {
                 dataLength += (data.length * FLOAT64_SIZE);
             }
-            else if (type === 'String') {
+            else if (type === 'String' || type === 'Url') {
                 dataLength += (data.length * UINT8_SIZE);
             }
 
@@ -211,6 +211,26 @@ describe('xdr functions', function() {
             var result = new dapUnpacker(testDODSBuffer, testDASVar).getValue();
 
             expect(result).toEqual([Math.pow(2, -1022), Math.pow(2, -1074), (1 + (1 - Math.pow(2, -52))) * Math.pow(2, 1023)]);
+        });
+
+        it('should unpack a string', function() {
+            var testDDS = 'Dataset {String TEST;} test%2Enc;';
+            var testDASVar = buildDASVar('String', [], []);
+            var testDODSBuffer = buildDODSBuffer(testDDS, 'String', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_');
+
+            var result = new dapUnpacker(testDODSBuffer, testDASVar).getValue();
+
+            expect(result).toEqual('ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_');
+        });
+
+        it('should unpack an url', function() {
+            var testDDS = 'Dataset {Url TEST;} test%2Enc;';
+            var testDASVar = buildDASVar('Url', [], []);
+            var testDODSBuffer = buildDODSBuffer(testDDS, 'Url', 'http://test.com');
+
+            var result = new dapUnpacker(testDODSBuffer, testDASVar).getValue();
+
+            expect(result).toEqual('http://test.com');
         });
     });
 
