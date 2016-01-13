@@ -1,33 +1,32 @@
 {
-  "name": "jsdap",
-  "version": "4.0.0",
-  "description": "",
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@bitbucket.org:jetfuse/jsdap.git"
-  },
-  "author": "",
-  "license": "",
-  "homepage": "https://bitbucket.org/jetfuse/jsdap",
-  "private": true,
-  "main": "jsdap.js",
-  "scripts": {
-    "build": "npm run beautify && npm run minify",
+	"name": "jsdap",
+	"version": "4.0.0",
+	"description": "A JavaScript OPeNDAP client",
+	"repository": {
+		"type": "git",
+		"url": "git+ssh://git@bitbucket.org:jetfuse/jsdap.git"
+	},
+	"license": "MIT",
+	"homepage": "https://bitbucket.org/jetfuse/jsdap",
+	"private": true,
+	"main": "jsdap.js",
+	"scripts": {
+		"build": "npm run beautify && npm run minify",
 		"beautify": "uglifyjs src/header.js src/parser.js src/xdr.js src/api.js --comments all -b -o jsdap.js",
 		"minify": "uglifyjs src/header.js src/parser.js src/xdr.js src/api.js -o jsdap.min.js",
-    "prepublish": "npm run build",
+		"prepublish": "npm run build",
 		"test": "karma start test/karma.conf.js"
-  },
-  "dependencies": {},
-  "devDependencies": {
+	},
+	"dependencies": {},
+	"devDependencies": {
 		"eslint": "^1.7.3",
 		"eslint-plugin-jasmine": "^1.6.0",
-    "jasmine-core": "^2.4.1",
-    "karma": "^0.13",
-    "karma-chrome-launcher": "^0.2.2",
-    "karma-cli": "^0.1.1",
-    "karma-firefox-launcher": "^0.1.7",
-    "karma-jasmine": "^0.3.6",
-    "uglify-js": "^2.6.1"
-  }
+		"jasmine-core": "^2.4.1",
+		"karma": "^0.13",
+		"karma-chrome-launcher": "^0.2.2",
+		"karma-cli": "^0.1.1",
+		"karma-firefox-launcher": "^0.1.7",
+		"karma-jasmine": "^0.3.6",
+		"uglify-js": "^2.6.1"
+	}
 }
