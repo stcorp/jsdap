@@ -6,7 +6,7 @@
             function load() {
                 var url = document.getElementById('url').value;
                 var ta = document.getElementById('textarea');
-                loadData(url, function(data) {
+                jsdap.loadData(url, function(data) {
                     ta.value = toJsonString(data);
                 }, '/proxy/');
                 return false;

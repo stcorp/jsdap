@@ -5,7 +5,7 @@
             function load() {
                 var url = document.getElementById('url').value;
                 var div = document.getElementById('dataset');
-                loadDataset(url, function(data) {
+                jsdap.loadDataset(url, function(data) {
                     var root = document.getElementById('dataset');
                     root.innerHTML = '';
                     buildTree(root, data);
@@ -30,7 +30,7 @@
                         if (data[child].type) {
                             buildTree(root, data[child]);
                         }
-                    }    
+                    }
                 }
             }
 

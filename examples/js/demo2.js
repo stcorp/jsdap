@@ -5,7 +5,7 @@ var baseUrl = "http://dapper.pmel.noaa.gov/dapper/epic/tao_time_series.cdp";
 
 
 /*
- * Create the initial map, download location data & 
+ * Create the initial map, download location data &
  * variables names.
  */
 function onLoad() {
@@ -16,7 +16,7 @@ function onLoad() {
 
     var layer = new OpenLayers.Layer.WMS('OpenLayers WMS',
             'http://labs.metacarta.com/wms/vmap0',
-            {layers: 'basic'}, 
+            {layers: 'basic'},
             {wrapDateLine: true});
     map.addLayer(layer);
     map.setCenter(new OpenLayers.LonLat(-145, 0), 3);
@@ -28,10 +28,10 @@ function onLoad() {
     // Add buoys. Apparently, dapper always returns the data
     // in the order lon/lat/_id, independently of the projection.
     var url = baseUrl + ".dods?location.lon,location.lat,location._id";
-    loadData(url, plotBuoys, '/proxy/');
+    jsdap.loadData(url, plotBuoys, '/proxy/');
 
     // Read variables in each location.
-    loadDataset(baseUrl, loadVariables, '/proxy/');
+    jsdap.loadDataset(baseUrl, loadVariables, '/proxy/');
 }
 
 
@@ -71,7 +71,7 @@ function plotBuoys(data) {
         lon = station[0] - 360.0;
         lat = station[1];
         _id = station[2];
-        
+
         var marker = new OpenLayers.Marker(new OpenLayers.LonLat(lon,lat), icon.clone());
         marker.metadata = {id: _id, lat: lat, lon: lon};
         marker.events.register('click', marker, selectBuoy);
@@ -81,7 +81,7 @@ function plotBuoys(data) {
 
 
 /*
- * Select a buoy. We show the location and 
+ * Select a buoy. We show the location and
  * allow variables to be selected.
  */
 function selectBuoy() {
@@ -92,8 +92,8 @@ function selectBuoy() {
     }
     this.icon.imageDiv.firstChild.setAttribute('src', 'js/OpenLayers/img/marker.png');
 
-    $('#buoy').html('Buoy ' + this.metadata.id + ': ' + 
-            decToDeg(this.metadata.lat, 'NS') + ' ' + 
+    $('#buoy').html('Buoy ' + this.metadata.id + ': ' +
+            decToDeg(this.metadata.lat, 'NS') + ' ' +
             decToDeg(this.metadata.lon, 'EW'));
     $(':checkbox').not('.time').removeAttr('disabled');
 }
@@ -123,8 +123,8 @@ function getData() {
     url = url.replace(/,$/, '');
     //url += '&location.time>1.1e12';  // get only a couple of points for this demo.
     url += '&location._id=' + id;
-    
-    loadData(url, plotData, '/proxy/');
+
+    jsdap.loadData(url, plotData, '/proxy/');
 }
 
 
@@ -169,7 +169,7 @@ function removeNaN(data) {
                 data.splice(i, 1);
                 i--;
                 break
-            } 
+            }
         }
         i++;
     }
