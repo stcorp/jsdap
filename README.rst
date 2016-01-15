@@ -7,7 +7,7 @@ If you run ``npm run build``, they will be combined and made into both
 
 The API is as simple as it gets::
 
-    loadDataset(url, callback [, proxy])
+    jsdap.loadDataset(url, callback [, proxy])
 
 This will load the metadata from an OPeNDAP url, and return it to
 your callback function as a Javascript object identical to pydap's
@@ -17,7 +17,7 @@ Note that if the server is on a different domain you need to specify
 a proxy to handle the requests. There's a simple proxy written in
 Python that comes together with jsdap.::
 
-    loadData(url, callback [, proxy])
+    jsdap.loadData(url, callback [, proxy])
 
 This functions read the data from a ``.dods`` URL
 (http://example.com/dataset.dods?var1,var2&var3>0), returning it
