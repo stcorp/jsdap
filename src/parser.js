@@ -1,373 +1,373 @@
-var atomicTypes = ['byte', 'int', 'uint', 'int16', 'uint16', 'int32', 'uint32', 'float32', 'float64', 'string', 'url', 'alias'];
-var structures = ['Sequence', 'Structure', 'Dataset'];
+var parser = {};
 
+(function() {
+    'use strict';
 
-Array.prototype.contains = function (item) {
-    for (var i = 0, el = this[i]; i < this.length; el = this[++i]) {
-        if (item === el) return true;
-    }
-    return false;
-};
+    var atomicTypes = ['byte', 'int', 'uint', 'int16', 'uint16', 'int32', 'uint32', 'float32', 'float64', 'string', 'url', 'alias'];
+    var structures = ['Sequence', 'Structure', 'Dataset'];
 
+    Array.prototype.contains = function (item) {
+        for (var i = 0, el = this[i]; i < this.length; el = this[++i]) {
+            if (item === el) return true;
+        }
+        return false;
+    };
 
-String.prototype.trim = function() {
-    return this.replace(/^\s+|\s+$/g, '');
-};
+    String.prototype.trim = function() {
+        return this.replace(/^\s+|\s+$/g, '');
+    };
 
-String.prototype.ltrim = function() {
-    return this.replace(/^[\s\n\r\t]+/, '');
-};
+    String.prototype.ltrim = function() {
+        return this.replace(/^[\s\n\r\t]+/, '');
+    };
 
-String.prototype.rtrim = function() {
-    return this.replace(/\s+$/, '');
-};
+    String.prototype.rtrim = function() {
+        return this.replace(/\s+$/, '');
+    };
 
-
-function pseudoSafeEval(str) {
-    //If it's a string, return a string, otherwise evaluate to a number
-    //TODO: Is this correct? Should we try and eval, and if it fails, return the string?
-    if (str.indexOf('"') !== -1) {
-        return str;
-    }
-    else {
-        return eval('(' + str + ')');
-    }
-}
-
-
-function dapType(type) {
-    this.type = type;
-    this.attributes = {};
-}
-
-
-function simpleParser(input) {
-    this.stream = input;
-
-    this.peek = function(expr) {
-        var regExp = new RegExp('^' + expr, 'i');
-        var m = this.stream.match(regExp);
-        if (m) {
-            return m[0];
+    var pseudoSafeEval = function(str) {
+        //If it's a string, return a string, otherwise evaluate to a number
+        //TODO: Is this correct? Should we try and eval, and if it fails, return the string?
+        if (str.indexOf('"') !== -1) {
+            return str;
         }
         else {
-            return '';
+            return eval('(' + str + ')');
         }
     };
 
-    this.consume = function(expr) {
-        var regExp = new RegExp('^' + expr, 'i');
-        var m = this.stream.match(regExp);
-        if (m) {
-            this.stream = this.stream.substr(m[0].length).ltrim();
-            return m[0];
-        }
-        else {
-            throw new Error('Unable to parse stream: ' + this.stream.substr(0, 10));
-        }
+    //TODO: Should this be private?
+    parser.dapType = function(type) {
+        this.type = type;
+        this.attributes = {};
     };
-}
 
+    var simpleParser = function(input) {
+        this.stream = input;
 
-function ddsParser(dds) {
-    this.stream = this.dds = dds;
+        this.peek = function(expr) {
+            var regExp = new RegExp('^' + expr, 'i');
+            var m = this.stream.match(regExp);
+            if (m) {
+                return m[0];
+            }
+            else {
+                return '';
+            }
+        };
 
-    this._dataset = function() {
-        var dataset = new dapType('Dataset');
+        this.consume = function(expr) {
+            var regExp = new RegExp('^' + expr, 'i');
+            var m = this.stream.match(regExp);
+            if (m) {
+                this.stream = this.stream.substr(m[0].length).ltrim();
+                return m[0];
+            }
+            else {
+                throw new Error('Unable to parse stream: ' + this.stream.substr(0, 10));
+            }
+        };
+    };
 
-        this.consume('dataset');
-        this.consume('{');
-        while (!this.peek('}')) {
-            var declaration = this._declaration();
-            dataset[declaration.name] = declaration;
-        }
-        this.consume('}');
+    parser.ddsParser = function(dds) {
+        this.stream = this.dds = dds;
 
-        dataset.id = dataset.name = this.consume('[^;]+');
-        this.consume(';');
+        this._dataset = function() {
+            var dataset = new parser.dapType('Dataset');
 
-        // Set id.
-        function walk(dapvar, includeParent) {
-            for (var attr in dapvar) {
-                var child = dapvar[attr];
-                if (child.type) {
-                    child.id = child.name;
-                    if (includeParent) {
-                        child.id = dapvar.id + '.' + child.id;
+            this.consume('dataset');
+            this.consume('{');
+            while (!this.peek('}')) {
+                var declaration = this._declaration();
+                dataset[declaration.name] = declaration;
+            }
+            this.consume('}');
+
+            dataset.id = dataset.name = this.consume('[^;]+');
+            this.consume(';');
+
+            // Set id.
+            function walk(dapvar, includeParent) {
+                for (var attr in dapvar) {
+                    var child = dapvar[attr];
+                    if (child.type) {
+                        child.id = child.name;
+                        if (includeParent) {
+                            child.id = dapvar.id + '.' + child.id;
+                        }
+                        walk(child, true);
                     }
-                    walk(child, true);
                 }
             }
-        }
-        walk(dataset, false);
+            walk(dataset, false);
 
-        return dataset;
-    };
-    this.parse = this._dataset;
+            return dataset;
+        };
+        this.parse = this._dataset;
 
-    this._declaration = function() {
-        var type = this.peek('\\w+').toLowerCase();
-        switch (type) {
-            case 'grid'     : return this._grid();
-            case 'structure': return this._structure();
-            case 'sequence' : return this._sequence();
-            default         : return this._base_declaration();
-        }
-    };
-
-    this._base_declaration = function() {
-        var baseType = new dapType();
-
-        baseType.type = this.consume('\\w+');
-        baseType.name = this.consume('\\w+');
-
-        baseType.dimensions = [];
-        baseType.shape = [];
-        while (!this.peek(';')) {
-            this.consume('\\[');
-            var token = this.consume('\\w+');
-            if (this.peek('=')) {
-                baseType.dimensions.push(token);
-                this.consume('=');
-                token = this.consume('\\d+');
+        this._declaration = function() {
+            var type = this.peek('\\w+').toLowerCase();
+            switch (type) {
+                case 'grid'     : return this._grid();
+                case 'structure': return this._structure();
+                case 'sequence' : return this._sequence();
+                default         : return this._base_declaration();
             }
-            baseType.shape.push(parseInt(token));
-            this.consume('\\]');
-        }
-        this.consume(';');
+        };
 
-        return baseType;
+        this._base_declaration = function() {
+            var baseType = new parser.dapType();
+
+            baseType.type = this.consume('\\w+');
+            baseType.name = this.consume('\\w+');
+
+            baseType.dimensions = [];
+            baseType.shape = [];
+            while (!this.peek(';')) {
+                this.consume('\\[');
+                var token = this.consume('\\w+');
+                if (this.peek('=')) {
+                    baseType.dimensions.push(token);
+                    this.consume('=');
+                    token = this.consume('\\d+');
+                }
+                baseType.shape.push(parseInt(token));
+                this.consume('\\]');
+            }
+            this.consume(';');
+
+            return baseType;
+        };
+
+        this._grid = function() {
+            var grid = new parser.dapType('Grid');
+
+            this.consume('grid');
+            this.consume('{');
+
+            this.consume('array');
+            this.consume(':');
+            grid.array = this._base_declaration();
+
+            this.consume('maps');
+            this.consume(':');
+            grid.maps = {};
+            while (!this.peek('}')) {
+                var map_ = this._base_declaration();
+                grid.maps[map_.name] = map_;
+            }
+            this.consume('}');
+
+            grid.name = this.consume('\\w+');
+            this.consume(';');
+
+            return grid;
+        };
+
+        this._sequence = function() {
+            var sequence = new parser.dapType('Sequence');
+
+            this.consume('sequence');
+            this.consume('{');
+            while (!this.peek('}')) {
+                var declaration = this._declaration();
+                sequence[declaration.name] = declaration;
+            }
+            this.consume('}');
+
+            sequence.name = this.consume('\\w+');
+            this.consume(';');
+
+            return sequence;
+        };
+
+        this._structure = function() {
+            var structure = new parser.dapType('Structure');
+
+            this.consume('structure');
+            this.consume('{');
+            while (!this.peek('}')) {
+                var declaration = this._declaration();
+                structure[declaration.name] = declaration;
+            }
+            this.consume('}');
+
+            structure.name = this.consume('\\w+');
+            this.consume(';');
+
+            return structure;
+        };
     };
-
-    this._grid = function() {
-        var grid = new dapType('Grid');
-
-        this.consume('grid');
-        this.consume('{');
-
-        this.consume('array');
-        this.consume(':');
-        grid.array = this._base_declaration();
-
-        this.consume('maps');
-        this.consume(':');
-        grid.maps = {};
-        while (!this.peek('}')) {
-            var map_ = this._base_declaration();
-            grid.maps[map_.name] = map_;
-        }
-        this.consume('}');
-
-        grid.name = this.consume('\\w+');
-        this.consume(';');
-
-        return grid;
-    };
-
-    this._sequence = function() {
-        var sequence = new dapType('Sequence');
-
-        this.consume('sequence');
-        this.consume('{');
-        while (!this.peek('}')) {
-            var declaration = this._declaration();
-            sequence[declaration.name] = declaration;
-        }
-        this.consume('}');
-
-        sequence.name = this.consume('\\w+');
-        this.consume(';');
-
-        return sequence;
-    };
-
-    this._structure = function() {
-        var structure = new dapType('Structure');
-
-        this.consume('structure');
-        this.consume('{');
-        while (!this.peek('}')) {
-            var declaration = this._declaration();
-            structure[declaration.name] = declaration;
-        }
-        this.consume('}');
-
-        structure.name = this.consume('\\w+');
-        this.consume(';');
-
-        return structure;
-    };
-}
-ddsParser.prototype = new simpleParser;
+    parser.ddsParser.prototype = new simpleParser;
 
 
-function dasParser(das, dataset) {
-    this.stream = this.das = das;
-    this.dataset = dataset;
+    parser.dasParser = function(das, dataset) {
+        this.stream = this.das = das;
+        this.dataset = dataset;
 
-    this.parse = function() {
-        this._target = this.dataset;
+        this.parse = function() {
+            this._target = this.dataset;
 
-        this.consume('attributes');
-        this.consume('{');
-        while (!this.peek('}')) {
-            this._attr_container();
-        }
-        this.consume('}');
+            this.consume('attributes');
+            this.consume('{');
+            while (!this.peek('}')) {
+                this._attr_container();
+            }
+            this.consume('}');
 
-        return this.dataset;
-    };
+            return this.dataset;
+        };
 
-    this._attr_container = function() {
-        if (atomicTypes.contains(this.peek('\\w+').toLowerCase())) {
-            this._attribute(this._target.attributes);
+        this._attr_container = function() {
+            if (atomicTypes.contains(this.peek('\\w+').toLowerCase())) {
+                this._attribute(this._target.attributes);
 
-            if (this._target.type === 'Grid') {
-                for (map in this._target.maps) {
-                    if (this.dataset[map]) {
-                        var map = this._target.maps[map];
-                        for (var name in map.attributes) {
-                            this.dataset[map].attributes[name] = map.attributes[name];
+                if (this._target.type === 'Grid') {
+                    for (map in this._target.maps) {
+                        if (this.dataset[map]) {
+                            var map = this._target.maps[map];
+                            for (var name in map.attributes) {
+                                this.dataset[map].attributes[name] = map.attributes[name];
+                            }
                         }
                     }
                 }
+            } else {
+                this._container();
             }
-        } else {
-            this._container();
-        }
-    };
+        };
 
-    this._container = function() {
-        var name = this.consume('[\\w_\\.]+');
-        this.consume('{');
+        this._container = function() {
+            var name = this.consume('[\\w_\\.]+');
+            this.consume('{');
 
-        var target;
+            var target;
 
-        if (name.indexOf('.') > -1) {
-            var names = name.split('.');
-            target = this._target;
-            for (var i=0; i<names.length; i++) {
-                this._target = this._target[names[i]];
+            if (name.indexOf('.') > -1) {
+                var names = name.split('.');
+                target = this._target;
+                for (var i=0; i<names.length; i++) {
+                    this._target = this._target[names[i]];
+                }
+
+                while (!this.peek('}')) {
+                    this._attr_container();
+                }
+                this.consume('}');
+
+                this._target = target;
             }
+            else if ((structures.contains(this._target.type)) && (this._target[name])) {
+                target = this._target;
+                this._target = target[name];
 
-            while (!this.peek('}')) {
-                this._attr_container();
-            }
-            this.consume('}');
+                while (!this.peek('}')) {
+                    this._attr_container();
+                }
+                this.consume('}');
 
-            this._target = target;
-        }
-        else if ((structures.contains(this._target.type)) && (this._target[name])) {
-            target = this._target;
-            this._target = target[name];
-
-            while (!this.peek('}')) {
-                this._attr_container();
-            }
-            this.consume('}');
-
-            this._target = target;
-        }
-        else {
-            this._target.attributes[name] = this._metadata();
-            this.consume('}');
-        }
-    };
-
-    this._metadata = function() {
-        var output = {};
-        while (!this.peek('}')) {
-            if (atomicTypes.contains(this.peek('\\w+').toLowerCase())) {
-                this._attribute(output);
+                this._target = target;
             }
             else {
-                var name = this.consume('\\w+');
-                this.consume('{');
-                output[name] = this._metadata();
+                this._target.attributes[name] = this._metadata();
                 this.consume('}');
             }
-        }
-        return output;
-    };
+        };
 
-    this._attribute = function(object) {
-        var type = this.consume('\\w+');
-        var name = this.consume('\\b[a-zA-Z0-9_-]+\\b');
-
-        var value;
-        var values = [];
-
-        while (!this.peek(';')) {
-            if (type.toLowerCase() === 'string') {
-                value = this.consume('".*?[^\\\"]*"');
-
-                value = pseudoSafeEval(value);
-            }
-            else if (type.toLowerCase() === 'url') {
-                value = this.consume('".*?[^\\\\]"|[^;,]+');
-
-                value = pseudoSafeEval(value);
-            }
-            else if (type.toLowerCase() === 'alias') {
-                var target, tokens;
-
-                value = this.consume('".*?[^\\\\]"|[^;,]+');
-
-                if (value.match(/^\\./)) {
-                    tokens = value.substring(1).split('.');
-                    target = this.dataset;
+        this._metadata = function() {
+            var output = {};
+            while (!this.peek('}')) {
+                if (atomicTypes.contains(this.peek('\\w+').toLowerCase())) {
+                    this._attribute(output);
                 }
                 else {
-                    tokens = value.split('.');
-                    target = this._target;
-                }
-
-                for (var i=0; i<tokens.length; i++) {
-                    var token = tokens[i];
-                    if (target[token]) {
-                        target = target[token];
-                    }
-                    else if (target.array.name === token) {
-                        target = target.array;
-                    }
-                    else if (target.maps[token]) {
-                        target = target.maps[token];
-                    }
-                    else {
-                        target = target.attributes[token];
-                    }
-                    value = target;
+                    var name = this.consume('\\w+');
+                    this.consume('{');
+                    output[name] = this._metadata();
+                    this.consume('}');
                 }
             }
-            else {
-                value = this.consume('".*?[^\\\\]"|[^;,]+');
+            return output;
+        };
 
-                if (value.toLowerCase() === 'nan') {
-                    value = NaN;
-                }
-                else {
+        this._attribute = function(object) {
+            var type = this.consume('\\w+');
+            var name = this.consume('\\b[a-zA-Z0-9_-]+\\b');
+
+            var value;
+            var values = [];
+
+            while (!this.peek(';')) {
+                if (type.toLowerCase() === 'string') {
+                    value = this.consume('".*?[^\\\"]*"');
+
                     value = pseudoSafeEval(value);
                 }
+                else if (type.toLowerCase() === 'url') {
+                    value = this.consume('".*?[^\\\\]"|[^;,]+');
+
+                    value = pseudoSafeEval(value);
+                }
+                else if (type.toLowerCase() === 'alias') {
+                    var target, tokens;
+
+                    value = this.consume('".*?[^\\\\]"|[^;,]+');
+
+                    if (value.match(/^\\./)) {
+                        tokens = value.substring(1).split('.');
+                        target = this.dataset;
+                    }
+                    else {
+                        tokens = value.split('.');
+                        target = this._target;
+                    }
+
+                    for (var i=0; i<tokens.length; i++) {
+                        var token = tokens[i];
+                        if (target[token]) {
+                            target = target[token];
+                        }
+                        else if (target.array.name === token) {
+                            target = target.array;
+                        }
+                        else if (target.maps[token]) {
+                            target = target.maps[token];
+                        }
+                        else {
+                            target = target.attributes[token];
+                        }
+                        value = target;
+                    }
+                }
+                else {
+                    value = this.consume('".*?[^\\\\]"|[^;,]+');
+
+                    if (value.toLowerCase() === 'nan') {
+                        value = NaN;
+                    }
+                    else {
+                        value = pseudoSafeEval(value);
+                    }
+                }
+
+                values.push(value);
+
+                if (this.peek(',')) {
+                    this.consume(',');
+                }
+            }
+            this.consume(';');
+
+            if (values.length === 1) {
+                values = values[0];
             }
 
-            values.push(value);
-
-            if (this.peek(',')) {
-                this.consume(',');
-            }
-        }
-        this.consume(';');
-
-        if (values.length === 1) {
-            values = values[0];
-        }
-
-        object[name] = values;
+            object[name] = values;
+        };
     };
-}
-dasParser.prototype = new simpleParser;
+    parser.dasParser.prototype = new simpleParser;
 
-if (typeof exports !== 'undefined') {
-    exports.ddsParser = ddsParser;
-    exports.dasParser = dasParser;
-}
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = parser;
+    }
+})();
