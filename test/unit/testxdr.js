@@ -1,4 +1,10 @@
 describe('xdr functions', function() {
+    //The necessary require statements for testing against node
+    if (typeof require !== 'undefined' && module.exports) {
+        parser = require('../../src/parser');
+        xdr = require('../../src/xdr');
+    }
+
     describe('dap unpacker', function() {
         //Define some sizes in bytes
         var UINT8_SIZE = 1; //Uint8 == Byte

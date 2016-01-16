@@ -1,4 +1,9 @@
 describe('parser functions', function() {
+    //The necessary require statements for testing against node
+    if (typeof require !== 'undefined' && module.exports) {
+        parser = require('../../src/parser');
+    }
+
     describe('dds parser', function() {
         it('handles byte members', function() {
             var testDDS = 'Dataset {Byte TEST[TEST = 12];} test%2Enc;';
