@@ -8,7 +8,6 @@
 	},
 	"license": "MIT",
 	"homepage": "https://bitbucket.org/jetfuse/jsdap",
-	"private": true,
 	"main": "src/api.js",
 	"scripts": {
 		"build": "npm run beautify && npm run minify && cp jsdap.js examples/js",
