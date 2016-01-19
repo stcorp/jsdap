@@ -1,6 +1,8 @@
 To run these examples:
 
-    PYTHONPATH=. paster serve server.conf
+```sh
+PYTHONPATH=. paster serve server.conf
+```
 
 You need Python with Paste (http://pythonpaste.org/), PasteScript (http://pythonpaste.org/script/) and PasteDeploy (http://pythonpaste.org/deploy/). This will create a web server at:
 
