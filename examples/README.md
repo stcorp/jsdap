@@ -1,15 +1,15 @@
-To run these examples:
+To run these examples you will need to have compiled jsdap (`npm run build` which will also copy the compiled javascript to the correct folder). You can run the examples using npm by typing:
 
 ```sh
-PYTHONPATH=. paster serve server.conf
+npm run examples
 ```
 
-You need Python with Paste (http://pythonpaste.org/), PasteScript (http://pythonpaste.org/script/) and PasteDeploy (http://pythonpaste.org/deploy/). This will create a web server at http://localhost:8888/
+This will create a web server at http://localhost:3000/
 
-And a proxy at http://localhost:8888/proxy/
+And a proxy at http://localhost:3000/proxy/
 
 Open the demos at:
 
-*  http://localhost:8888/demo0.html
-*  http://localhost:8888/demo1.html
-*  http://localhost:8888/demo2.html
+*  http://localhost:3000/demo0.html
+*  http://localhost:3000/demo1.html
+*  http://localhost:3000/demo2.html
