@@ -2,8 +2,11 @@
 ###################
 node_modules/
 
+#      Logs       #
+###################
+npm-debug.log
+
 # Compiled source #
 ###################
 jsdap.js
 jsdap.min.js
-*.pyc

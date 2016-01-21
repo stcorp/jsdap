@@ -13,12 +13,14 @@
 		"build": "npm run beautify && npm run minify && cp jsdap.js examples/js",
 		"beautify": "uglifyjs src/header.js src/parser.js src/xdr.js src/api.js --comments all -b -o jsdap.js",
 		"minify": "uglifyjs src/header.js src/parser.js src/xdr.js src/api.js -o jsdap.min.js",
+        "examples": "node examples/server.js",
 		"test": "karma start test/karma.conf.js && jasmine JASMINE_CONFIG_PATH=test/jasmine.json"
 	},
 	"dependencies": {},
 	"devDependencies": {
 		"eslint": "^1.7.3",
 		"eslint-plugin-jasmine": "^1.6.0",
+        "express": "^4.13.3",
         "jasmine": "^2.4.1",
 		"jasmine-core": "^2.4.1",
 		"karma": "^0.13",
@@ -26,6 +28,7 @@
 		"karma-cli": "^0.1.1",
 		"karma-firefox-launcher": "^0.1.7",
 		"karma-jasmine": "^0.3.6",
+        "request": "^2.65.0",
 		"uglify-js": "^2.6.1"
 	}
 }
