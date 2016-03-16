@@ -12,19 +12,29 @@ if (typeof require !== 'undefined' && module.exports) {
         var xml = new XMLHttpRequest();
 
         xml.open('GET', url, true);
-        xml.responseType = "arraybuffer";
+        if(binary){
+            xml.responseType = "arraybuffer";
+        }
+        else{
+            if (xml.overrideMimeType) {
+                xml.overrideMimeType('text/plain; charset=x-user-defined');
+            }
+            else {
+                xml.setRequestHeader('Accept-Charset', 'x-user-defined');
+            }
+        }
 
         xml.onreadystatechange = function() {
             if (xml.readyState === 4) {
-                var buf =
-                       xml.responseBody           // XHR2
-                    || xml.response               // FF7/Chrome 11-15
-                    || xml.mozResponseArrayBuffer; // FF5
-                if (!binary) {
-                    callback(xml.responseText);
+                if (binary) {
+                    var buf =
+                           xml.responseBody           // XHR2
+                        || xml.response               // FF7/Chrome 11-15
+                        || xml.mozResponseArrayBuffer; // FF5
+                    callback(buf)
                 }
                 else {
-                    callback(buf);
+                    callback(xml.responseText);
                 }
             }
         };
