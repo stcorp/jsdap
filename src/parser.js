@@ -26,14 +26,7 @@ var parser = {};
     };
 
     var pseudoSafeEval = function(str) {
-        //If it's a string, return a string, otherwise evaluate to a number
-        //TODO: Is this correct? Should we try and eval, and if it fails, return the string?
-        if (str.indexOf('"') !== -1) {
-            return str;
-        }
-        else {
-            return eval('(' + str + ')');
-        }
+        return eval('(' + str + ')');
     };
 
     //TODO: Should this be private?
@@ -300,13 +293,9 @@ var parser = {};
             while (!this.peek(';')) {
                 if (type.toLowerCase() === 'string') {
                     value = this.consume('"([^"]|\\")*"');
-
-                    value = pseudoSafeEval(value);
                 }
                 else if (type.toLowerCase() === 'url') {
                     value = this.consume('".*?[^\\\\]"|[^;,]+');
-
-                    value = pseudoSafeEval(value);
                 }
                 else if (type.toLowerCase() === 'alias') {
                     var target, tokens;
