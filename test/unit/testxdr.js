@@ -209,12 +209,14 @@ describe('xdr functions', function() {
         });
 
         it('should unpack a string', function() {
+            var testString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_"/\\\'[](){}';
+
             var testDASVar = buildDASVar('String', []);
-            var testDODSBuffer = buildDODSBuffer('String', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_"/\\[](){}');
+            var testDODSBuffer = buildDODSBuffer('String', testString);
 
             var result = new xdr.dapUnpacker(testDODSBuffer, testDASVar).getValue();
 
-            expect(result).toEqual('ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_"/\\[](){}');
+            expect(result).toEqual(testString);
         });
 
         it('should unpack an url', function() {
