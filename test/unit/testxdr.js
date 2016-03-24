@@ -209,7 +209,7 @@ describe('xdr functions', function() {
         });
 
         it('should unpack a string', function() {
-            var testString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_"/\\\'[](){}';
+            var testString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_\\\\"/\\\'[](){}';
 
             var testDASVar = buildDASVar('String', []);
             var testDODSBuffer = buildDODSBuffer('String', testString);

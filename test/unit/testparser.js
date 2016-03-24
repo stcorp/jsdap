@@ -558,7 +558,9 @@ describe('parser functions', function() {
         });
 
         it('handles string members', function() {
-            var testDAS = 'Attributes {TEST { String test_attr "ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_"; }}';
+            var testString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_\\\\"/\\\'[](){}';
+
+            var testDAS = 'Attributes {TEST { String test_attr "' + testString + '"; }}';
 
             var datasetDapType = new parser.dapType('Dataset');
 
@@ -566,7 +568,7 @@ describe('parser functions', function() {
             datasetDapType.id = 'test%2Enc';
 
             var testDapType = new parser.dapType('Byte');
-            testDapType.attributes = {test_attr: '"ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_"'};
+            testDapType.attributes = {test_attr: '"' + testString + '"'};
 
             testDapType.name = 'TEST';
             testDapType.dimensions = [];

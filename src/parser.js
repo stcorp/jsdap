@@ -299,7 +299,7 @@ var parser = {};
 
             while (!this.peek(';')) {
                 if (type.toLowerCase() === 'string') {
-                    value = this.consume('".*?[^\\\"]*"');
+                    value = this.consume('"([^"]|\\")*"');
 
                     value = pseudoSafeEval(value);
                 }
