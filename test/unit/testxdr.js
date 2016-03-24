@@ -210,11 +210,11 @@ describe('xdr functions', function() {
 
         it('should unpack a string', function() {
             var testDASVar = buildDASVar('String', []);
-            var testDODSBuffer = buildDODSBuffer('String', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_');
+            var testDODSBuffer = buildDODSBuffer('String', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_"/\\[](){}');
 
             var result = new xdr.dapUnpacker(testDODSBuffer, testDASVar).getValue();
 
-            expect(result).toEqual('ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_');
+            expect(result).toEqual('ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_"/\\[](){}');
         });
 
         it('should unpack an url', function() {
@@ -278,8 +278,6 @@ describe('xdr functions', function() {
                 else if (valueType === 'String' || valueType === 'Url') {
                     //Write the length
                     _writeValueToOutputBuffer('Uint32', value.length);
-
-                    console.log('string length: ', value.length);
 
                     for (var charIndex = 0; charIndex < value.length; charIndex++) {
                         _writeValueToOutputBuffer('Byte', value.charCodeAt(charIndex) & 0x00ff);
