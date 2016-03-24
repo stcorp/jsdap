@@ -25,9 +25,9 @@ var parser = {};
         return this.replace(/\s+$/, '');
     };
 
-    var pseudoSafeEval = function(str) {
+    function pseudoSafeEval(str) {
         return eval('(' + str + ')');
-    };
+    }
 
     //TODO: Should this be private?
     parser.dapType = function(type) {
@@ -35,7 +35,7 @@ var parser = {};
         this.attributes = {};
     };
 
-    var simpleParser = function(input) {
+    function simpleParser(input) {
         this.stream = input;
 
         this.peek = function(expr) {
@@ -60,7 +60,7 @@ var parser = {};
                 throw new Error('Unable to parse stream: ' + this.stream.substr(0, 10));
             }
         };
-    };
+    }
 
     parser.ddsParser = function(dds) {
         this.stream = this.dds = dds;
