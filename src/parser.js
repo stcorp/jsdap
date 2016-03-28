@@ -6,6 +6,28 @@ var parser = {};
     var ATOMIC_TYPES = ['byte', 'int', 'uint', 'int16', 'uint16', 'int32', 'uint32', 'float32', 'float64', 'string', 'url', 'alias'];
     var STRUCTURED_TYPES = ['Sequence', 'Structure', 'Dataset'];
 
+    //Regular expressions
+    //DDS parsing expressions
+    var DDS_DATASET_ID_EXPRESSION = '[^;]+';
+    var DDS_BASE_TYPE_EXPRESSION = '\\w+';
+    var DDS_BASE_TYPE_NAME_EXPRESSION = '\\w+'; //Type name ends with a square bracket
+    var DDS_BASE_TYPE_DIMENSION_NAME_EXPRESSION = '\\w+';
+    var DDS_BASE_TYPE_DIMENSION_VALUE_EXPRESSION = '\\d+';
+    var DDS_GRID_NAME_EXPRESSION = '\\w+';
+    var DDS_SEQUENCE_NAME_EXPRESSION = '\\w+';
+    var DDS_STRUCTURE_NAME_EXPRESSION = '\\w+';
+
+    //DAS parsing expressions
+    var DAS_TYPE_EXPRESSION = '\\w+';
+    var DAS_METADATA_NAME_EXPRESSION = '\\w+';
+    var DAS_ATTRIBUTE_TYPE_EXPRESSION = '\\w+';
+    var DAS_ATTRIBUTE_NAME_EXPRESSION = '\\S+'; //Ends with whitespace?
+    var DAS_CONTAINER_NAME_EXPRESSION = '[\\w_\\.]+';
+    var DAS_STRING_EXPRESSION = '"([^"]|\\")*"'; //Ends with a double quote
+    var DAS_URL_EXPRESSION = '".*?[^\\\\]"|[^;,]+';
+    var DAS_ALIAS_EXPRESSION = '".*?[^\\\\]"|[^;,]+';
+    var DAS_NUMERICAL_EXPRESSION = '".*?[^\\\\]"|[^;,]+';
+
     Array.prototype.contains = function (item) {
         for (var i = 0, el = this[i]; i < this.length; el = this[++i]) {
             if (item === el) return true;
@@ -76,7 +98,7 @@ var parser = {};
             }
             this.consume('}');
 
-            dataset.id = dataset.name = this.consume('[^;]+');
+            dataset.id = dataset.name = this.consume(DDS_DATASET_ID_EXPRESSION);
             this.consume(';');
 
             // Set id.
@@ -99,7 +121,7 @@ var parser = {};
         this.parse = this._dataset;
 
         this._declaration = function() {
-            var type = this.peek('\\w+').toLowerCase();
+            var type = this.peek(DDS_BASE_TYPE_EXPRESSION).toLowerCase();
             switch (type) {
                 case 'grid'     : return this._grid();
                 case 'structure': return this._structure();
@@ -111,18 +133,18 @@ var parser = {};
         this._base_declaration = function() {
             var baseType = new parser.dapType();
 
-            baseType.type = this.consume('\\w+');
-            baseType.name = this.consume('\\w+');
+            baseType.type = this.consume(DDS_BASE_TYPE_EXPRESSION);
+            baseType.name = this.consume(DDS_BASE_TYPE_NAME_EXPRESSION);
 
             baseType.dimensions = [];
             baseType.shape = [];
             while (!this.peek(';')) {
                 this.consume('\\[');
-                var token = this.consume('\\w+');
+                var token = this.consume(DDS_BASE_TYPE_DIMENSION_NAME_EXPRESSION);
                 if (this.peek('=')) {
                     baseType.dimensions.push(token);
                     this.consume('=');
-                    token = this.consume('\\d+');
+                    token = this.consume(DDS_BASE_TYPE_DIMENSION_VALUE_EXPRESSION);
                 }
                 baseType.shape.push(parseInt(token));
                 this.consume('\\]');
@@ -151,7 +173,7 @@ var parser = {};
             }
             this.consume('}');
 
-            grid.name = this.consume('\\w+');
+            grid.name = this.consume(DDS_GRID_NAME_EXPRESSION);
             this.consume(';');
 
             return grid;
@@ -168,7 +190,7 @@ var parser = {};
             }
             this.consume('}');
 
-            sequence.name = this.consume('\\w+');
+            sequence.name = this.consume(DDS_SEQUENCE_NAME_EXPRESSION);
             this.consume(';');
 
             return sequence;
@@ -185,7 +207,7 @@ var parser = {};
             }
             this.consume('}');
 
-            structure.name = this.consume('\\w+');
+            structure.name = this.consume(DDS_STRUCTURE_NAME_EXPRESSION);
             this.consume(';');
 
             return structure;
@@ -212,7 +234,7 @@ var parser = {};
         };
 
         this._attr_container = function() {
-            if (ATOMIC_TYPES.contains(this.peek('\\w+').toLowerCase())) {
+            if (ATOMIC_TYPES.contains(this.peek(DAS_TYPE_EXPRESSION).toLowerCase())) {
                 this._attribute(this._target.attributes);
 
                 if (this._target.type === 'Grid') {
@@ -231,7 +253,7 @@ var parser = {};
         };
 
         this._container = function() {
-            var name = this.consume('[\\w_\\.]+');
+            var name = this.consume(DAS_CONTAINER_NAME_EXPRESSION);
             this.consume('{');
 
             var target;
@@ -270,11 +292,11 @@ var parser = {};
         this._metadata = function() {
             var output = {};
             while (!this.peek('}')) {
-                if (ATOMIC_TYPES.contains(this.peek('\\w+').toLowerCase())) {
+                if (ATOMIC_TYPES.contains(this.peek(DAS_TYPE_EXPRESSION).toLowerCase())) {
                     this._attribute(output);
                 }
                 else {
-                    var name = this.consume('\\w+');
+                    var name = this.consume(DAS_METADATA_NAME_EXPRESSION);
                     this.consume('{');
                     output[name] = this._metadata();
                     this.consume('}');
@@ -284,23 +306,23 @@ var parser = {};
         };
 
         this._attribute = function(object) {
-            var type = this.consume('\\w+');
-            var name = this.consume('\\b[a-zA-Z0-9_-]+\\b');
+            var type = this.consume(DAS_ATTRIBUTE_TYPE_EXPRESSION);
+            var name = this.consume(DAS_ATTRIBUTE_NAME_EXPRESSION);
 
             var value;
             var values = [];
 
             while (!this.peek(';')) {
                 if (type.toLowerCase() === 'string') {
-                    value = this.consume('"([^"]|\\")*"');
+                    value = this.consume(DAS_STRING_EXPRESSION);
                 }
                 else if (type.toLowerCase() === 'url') {
-                    value = this.consume('".*?[^\\\\]"|[^;,]+');
+                    value = this.consume(DAS_URL_EXPRESSION);
                 }
                 else if (type.toLowerCase() === 'alias') {
                     var target, tokens;
 
-                    value = this.consume('".*?[^\\\\]"|[^;,]+');
+                    value = this.consume(DAS_ALIAS_EXPRESSION);
 
                     if (value.match(/^\\./)) {
                         tokens = value.substring(1).split('.');
@@ -329,7 +351,7 @@ var parser = {};
                     }
                 }
                 else {
-                    value = this.consume('".*?[^\\\\]"|[^;,]+');
+                    value = this.consume(DAS_NUMERICAL_EXPRESSION);
 
                     if (value.toLowerCase() === 'nan') {
                         value = NaN;
