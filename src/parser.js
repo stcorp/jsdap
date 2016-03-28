@@ -3,8 +3,8 @@ var parser = {};
 (function() {
     'use strict';
 
-    var atomicTypes = ['byte', 'int', 'uint', 'int16', 'uint16', 'int32', 'uint32', 'float32', 'float64', 'string', 'url', 'alias'];
-    var structures = ['Sequence', 'Structure', 'Dataset'];
+    var ATOMIC_TYPES = ['byte', 'int', 'uint', 'int16', 'uint16', 'int32', 'uint32', 'float32', 'float64', 'string', 'url', 'alias'];
+    var STRUCTURED_TYPES = ['Sequence', 'Structure', 'Dataset'];
 
     Array.prototype.contains = function (item) {
         for (var i = 0, el = this[i]; i < this.length; el = this[++i]) {
@@ -212,7 +212,7 @@ var parser = {};
         };
 
         this._attr_container = function() {
-            if (atomicTypes.contains(this.peek('\\w+').toLowerCase())) {
+            if (ATOMIC_TYPES.contains(this.peek('\\w+').toLowerCase())) {
                 this._attribute(this._target.attributes);
 
                 if (this._target.type === 'Grid') {
@@ -250,7 +250,7 @@ var parser = {};
 
                 this._target = target;
             }
-            else if ((structures.contains(this._target.type)) && (this._target[name])) {
+            else if ((STRUCTURED_TYPES.contains(this._target.type)) && (this._target[name])) {
                 target = this._target;
                 this._target = target[name];
 
@@ -270,7 +270,7 @@ var parser = {};
         this._metadata = function() {
             var output = {};
             while (!this.peek('}')) {
-                if (atomicTypes.contains(this.peek('\\w+').toLowerCase())) {
+                if (ATOMIC_TYPES.contains(this.peek('\\w+').toLowerCase())) {
                     this._attribute(output);
                 }
                 else {
