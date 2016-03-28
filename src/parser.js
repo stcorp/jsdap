@@ -8,25 +8,25 @@ var parser = {};
 
     //Regular expressions
     //DDS parsing expressions
-    var DDS_DATASET_ID_EXPRESSION = '[^;]+';
-    var DDS_BASE_TYPE_EXPRESSION = '\\w+';
-    var DDS_BASE_TYPE_NAME_EXPRESSION = '\\w+'; //Type name ends with a square bracket
     var DDS_BASE_TYPE_DIMENSION_NAME_EXPRESSION = '\\w+';
     var DDS_BASE_TYPE_DIMENSION_VALUE_EXPRESSION = '\\d+';
+    var DDS_BASE_TYPE_EXPRESSION = '\\w+';
+    var DDS_BASE_TYPE_NAME_EXPRESSION = '\\w+'; //Type name ends with a square bracket
+    var DDS_DATASET_ID_EXPRESSION = '[^;]+';
     var DDS_GRID_NAME_EXPRESSION = '\\w+';
     var DDS_SEQUENCE_NAME_EXPRESSION = '\\w+';
     var DDS_STRUCTURE_NAME_EXPRESSION = '\\w+';
 
     //DAS parsing expressions
-    var DAS_TYPE_EXPRESSION = '\\w+';
-    var DAS_METADATA_NAME_EXPRESSION = '\\w+';
+    var DAS_ALIAS_EXPRESSION = '".*?[^\\\\]"|[^;,]+';
     var DAS_ATTRIBUTE_TYPE_EXPRESSION = '\\w+';
     var DAS_ATTRIBUTE_NAME_EXPRESSION = '\\S+'; //Ends with whitespace?
     var DAS_CONTAINER_NAME_EXPRESSION = '[\\w_\\.]+';
-    var DAS_STRING_EXPRESSION = '"([^"]|\\")*"'; //Ends with a double quote
-    var DAS_URL_EXPRESSION = '".*?[^\\\\]"|[^;,]+';
-    var DAS_ALIAS_EXPRESSION = '".*?[^\\\\]"|[^;,]+';
+    var DAS_METADATA_NAME_EXPRESSION = '\\w+';
     var DAS_NUMERICAL_EXPRESSION = '".*?[^\\\\]"|[^;,]+';
+    var DAS_STRING_EXPRESSION = '"([^"]|\\")*"'; //Ends with a double quote
+    var DAS_TYPE_EXPRESSION = '\\w+';
+    var DAS_URL_EXPRESSION = '".*?[^\\\\]"|[^;,]+';
 
     Array.prototype.contains = function (item) {
         for (var i = 0, el = this[i]; i < this.length; el = this[++i]) {
