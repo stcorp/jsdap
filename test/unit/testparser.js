@@ -699,5 +699,49 @@ describe('parser functions', function() {
 
             expect(result).toEqual(datasetDapType);
         });
+
+        it('handles special characters in attribute names', function() {
+            var datasetNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_"/\\\'[]()\\{}';
+            var attributeNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\\ abcdefghijklmnopqrstuvwxyz\\ 0123456789\\ ;-_"/\\\'[](){}';
+            var testString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_\\\\"/\\\'[](){}';
+
+            var testDAS = 'Attributes {' + datasetNameString + ' { String ' + attributeNameString + ' "' + testString + '"; }}';
+
+            var datasetDapType = new parser.dapType('Dataset');
+
+            datasetDapType.name = datasetNameString;
+            datasetDapType.id = datasetNameString;
+
+            var testDapType = new parser.dapType('String');
+            testDapType.attributes = {};
+            testDapType.attributes[attributeNameString] = '"' + testString + '"';
+
+            testDapType.name = datasetNameString;
+            testDapType.dimensions = [];
+            testDapType.shape = [];
+            testDapType.id = datasetNameString;
+
+            datasetDapType[datasetNameString] = testDapType;
+
+            //Also create a parsed DDS
+            var parsedDDS = new parser.dapType('Dataset');
+
+            parsedDDS.name = datasetNameString;
+            parsedDDS.id = datasetNameString;
+
+            var ddsDapType = new parser.dapType('String');
+
+            ddsDapType.name = datasetNameString;
+            ddsDapType.dimensions = [];
+            ddsDapType.shape = [];
+            ddsDapType.id = datasetNameString;
+
+            parsedDDS.attributes = {};
+            parsedDDS[datasetNameString] = ddsDapType;
+
+            var result = new parser.dasParser(testDAS, parsedDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
     });
 });

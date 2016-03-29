@@ -20,9 +20,9 @@ var parser = {};
     //DAS parsing expressions
     var DAS_ALIAS_EXPRESSION = '".*?[^\\\\]"|[^;,]+';
     var DAS_ATTRIBUTE_TYPE_EXPRESSION = '\\w+';
-    var DAS_ATTRIBUTE_NAME_EXPRESSION = '\\S+'; //Ends with whitespace?
-    var DAS_CONTAINER_NAME_EXPRESSION = '[\\w_\\.]+';
-    var DAS_METADATA_NAME_EXPRESSION = '\\w+';
+    var DAS_ATTRIBUTE_NAME_EXPRESSION = '(\\\\\\s|[^\\s])+'; //Ends with unescaped whitespace
+    var DAS_CONTAINER_NAME_EXPRESSION = '(\\\\{|[^{])+';
+    var DAS_METADATA_NAME_EXPRESSION = '(\\\\{|[^{])+';
     var DAS_NUMERICAL_EXPRESSION = '".*?[^\\\\]"|[^;,]+';
     var DAS_STRING_EXPRESSION = '"([^"]|\\")*"'; //Ends with a double quote
     var DAS_TYPE_EXPRESSION = '\\w+';
