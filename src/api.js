@@ -13,7 +13,7 @@ if (typeof require !== 'undefined' && module.exports) {
 
         xml.open('GET', url, true);
         if(binary){
-            xml.responseType = "arraybuffer";
+            xml.responseType = 'arraybuffer';
         }
         else{
             if (xml.overrideMimeType) {
@@ -31,7 +31,7 @@ if (typeof require !== 'undefined' && module.exports) {
                            xml.responseBody           // XHR2
                         || xml.response               // FF7/Chrome 11-15
                         || xml.mozResponseArrayBuffer; // FF5
-                    callback(buf)
+                    callback(buf);
                 }
                 else {
                     callback(xml.responseText);
