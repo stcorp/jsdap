@@ -8,14 +8,14 @@ var parser = {};
 
     //Regular expressions
     //DDS parsing expressions
-    var DDS_BASE_TYPE_DIMENSION_NAME_EXPRESSION = '\\w+';
+    var DDS_BASE_TYPE_DIMENSION_NAME_EXPRESSION = '(\\\\=|[^=])+'; //Dimension name will end at the equals sign
     var DDS_BASE_TYPE_DIMENSION_VALUE_EXPRESSION = '\\d+';
     var DDS_BASE_TYPE_EXPRESSION = '\\w+';
-    var DDS_BASE_TYPE_NAME_EXPRESSION = '\\w+'; //Type name ends with a square bracket
-    var DDS_DATASET_ID_EXPRESSION = '[^;]+';
-    var DDS_GRID_NAME_EXPRESSION = '\\w+';
-    var DDS_SEQUENCE_NAME_EXPRESSION = '\\w+';
-    var DDS_STRUCTURE_NAME_EXPRESSION = '\\w+';
+    var DDS_BASE_TYPE_NAME_EXPRESSION = '(\\\\;|\\\\\\[|[^\\[;])+'; //Type name ends with a square bracket or semicolon
+    var DDS_DATASET_ID_EXPRESSION = '(\\\\;|[^;])+'; //Ends with a semicolon
+    var DDS_GRID_NAME_EXPRESSION = '(\\\\;|[^;])+'; //Ends with a semicolon
+    var DDS_SEQUENCE_NAME_EXPRESSION = '(\\\\;|[^;])+'; //Ends with a semicolon
+    var DDS_STRUCTURE_NAME_EXPRESSION = '(\\\\;|[^;])+'; //Ends with a semicolon;
 
     //DAS parsing expressions
     var DAS_ALIAS_EXPRESSION = '".*?[^\\\\]"|[^;,]+';
@@ -76,7 +76,7 @@ var parser = {};
             var m = this.stream.match(regExp);
             if (m) {
                 this.stream = this.stream.substr(m[0].length).ltrim();
-                return m[0];
+                return m[0].trim();
             }
             else {
                 throw new Error('Unable to parse stream: ' + this.stream.substr(0, 10));

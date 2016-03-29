@@ -332,6 +332,101 @@ describe('parser functions', function() {
 
             expect(result).toEqual(datasetDapType);
         });
+
+        it('handles special characters for non structured members', function() {
+            var datasetNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 \\;-_"/\\\'[](){}';
+            var memberNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 \\;-_"/\\\'\\[]{}';
+
+            var testDDS = 'Dataset {Byte ' + memberNameString + '[' + memberNameString + ' = 12];} ' + datasetNameString + ';';
+
+            var datasetDapType = new parser.dapType('Dataset');
+
+            datasetDapType.name = datasetNameString;
+            datasetDapType.id = datasetNameString;
+
+            var testDapType = new parser.dapType('Byte');
+
+            testDapType.name = memberNameString;
+            testDapType.dimensions = [memberNameString];
+            testDapType.shape = [12];
+            testDapType.id = memberNameString;
+
+            datasetDapType[memberNameString] = testDapType;
+
+            var result = new parser.ddsParser(testDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
+
+        it('handles special characters for sequence members', function() {
+            var datasetNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 \\;-_"/\\\'[](){}';
+            var sequenceNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 \\;-_"/\\\'\\[]{}';
+            var memberNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 \\;-_"/\\\'\\[]{}';
+
+            var testDDS = 'Dataset {Sequence {String ' + memberNameString + ';} ' + sequenceNameString + ';} ' + datasetNameString + ';';
+
+            var datasetDapType = new parser.dapType('Dataset');
+
+            datasetDapType.name = datasetNameString;
+            datasetDapType.id = datasetNameString;
+
+            var stringDapType = new parser.dapType('String');
+            stringDapType.name = memberNameString;
+            stringDapType.dimensions = [];
+            stringDapType.shape = [];
+            stringDapType.id = sequenceNameString + '.' + memberNameString;
+
+            var sequenceDapType = new parser.dapType('Sequence');
+            sequenceDapType.name = sequenceNameString;
+            sequenceDapType[memberNameString] = stringDapType;
+            sequenceDapType.id = sequenceNameString;
+
+            datasetDapType[sequenceNameString] = sequenceDapType;
+
+            var result = new parser.ddsParser(testDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
+
+        it('handles special characters for grid members', function() {
+            var datasetNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 \\;-_"/\\\'[](){}';
+            var gridNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 \\;-_"/\\\'\\[]{}';
+            var arrayNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 \\;-_"/\\\'\\[]{}';
+            var dimensionNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 \\;-_"/\\\'\\[]{}';
+
+            var testDDS = 'Dataset {Grid {Array: Float32 ' + arrayNameString + '[' + dimensionNameString + ' = 12]; Maps: Float64 ' + dimensionNameString + '[' + dimensionNameString + ' = 12];} ' + gridNameString + ';} ' + datasetNameString + ';';
+
+            var datasetDapType = new parser.dapType('Dataset');
+
+            datasetDapType.name = datasetNameString;
+            datasetDapType.id = datasetNameString;
+
+            var arrayDapType = new parser.dapType('Float32');
+            arrayDapType.name = arrayNameString;
+            arrayDapType.dimensions = [dimensionNameString];
+            arrayDapType.shape = [12];
+            arrayDapType.id = gridNameString + '.' + arrayNameString;
+
+            var dimDapType = new parser.dapType('Float64');
+
+            dimDapType.name = dimensionNameString;
+            dimDapType.dimensions = [dimensionNameString];
+            dimDapType.shape = [12];
+
+            var testDapType = new parser.dapType('Grid');
+
+            testDapType.name = gridNameString;
+            testDapType.array = arrayDapType;
+            testDapType.maps = {};
+            testDapType.maps[dimensionNameString] = dimDapType;
+            testDapType.id = gridNameString;
+
+            datasetDapType[gridNameString] = testDapType;
+
+            var result = new parser.ddsParser(testDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
     });
 
     describe('das parser', function() {
