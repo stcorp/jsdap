@@ -12,10 +12,11 @@ if (typeof require !== 'undefined' && module.exports) {
         var xml = new XMLHttpRequest();
 
         xml.open('GET', url, true);
-        if(binary){
+
+        if (binary) {
             xml.responseType = 'arraybuffer';
         }
-        else{
+        else {
             if (xml.overrideMimeType) {
                 xml.overrideMimeType('text/plain; charset=x-user-defined');
             }
