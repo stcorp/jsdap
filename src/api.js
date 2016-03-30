@@ -8,6 +8,8 @@ if (typeof require !== 'undefined' && module.exports) {
 (function() {
     'use strict';
 
+    var XML_READY_STATE_DONE = 4;
+
     var proxyUrl = function(url, callback, binary) {
         var xml = new XMLHttpRequest();
 
@@ -26,7 +28,7 @@ if (typeof require !== 'undefined' && module.exports) {
         }
 
         xml.onreadystatechange = function() {
-            if (xml.readyState === 4) {
+            if (xml.readyState === XML_READY_STATE_DONE) {
                 if (binary) {
                     var buf =
                            xml.responseBody           // XHR2
