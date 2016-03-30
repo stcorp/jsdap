@@ -3,6 +3,7 @@ var jsdap = {};
 if (typeof require !== 'undefined' && module.exports) {
     parser = require('./parser');
     xdr = require('./xdr');
+    XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 }
 
 (function() {
