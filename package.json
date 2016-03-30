@@ -16,7 +16,9 @@
         "examples": "node examples/server.js",
         "test": "karma start test/karma.conf.js && jasmine JASMINE_CONFIG_PATH=test/jasmine.json"
     },
-    "dependencies": {},
+    "dependencies": {
+        "xmlhttprequest": "^1.8.0"
+    },
     "devDependencies": {
         "eslint": "^1.7.3",
         "eslint-plugin-jasmine": "^1.6.0",
