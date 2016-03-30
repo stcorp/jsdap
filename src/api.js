@@ -32,9 +32,9 @@ if (typeof require !== 'undefined' && module.exports) {
             if (xml.readyState === XML_READY_STATE_DONE) {
                 if (binary) {
                     var buf =
-                           xml.responseBody           // XHR2
-                        || xml.response               // FF7/Chrome 11-15
-                        || xml.mozResponseArrayBuffer; // FF5
+                           xml.responseBody             // XHR2
+                        || xml.response                 // FF7/Chrome 11-15
+                        || xml.mozResponseArrayBuffer;  // FF5
                     callback(buf);
                 }
                 else {
