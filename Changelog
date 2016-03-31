@@ -1,3 +1,10 @@
+5.0.0 (Thu Mar 31 14:31:52 BRT 2016):
+    Allow for special characters in string names / values. Escaping necessary.
+    Add loadDatasetAndDDS to API.
+    ArrayBuffer slice polyfill for IE10.
+    Require xmlhttprequest when running in a Node.js environment.
+    Add API tests.
+
 4.1.0 (Wed Dec 13 16:46:11 BRT 2016):
     Check for 'value' member on maps members of a dapvar.
     More tests.
