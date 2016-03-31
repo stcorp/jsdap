@@ -39,6 +39,12 @@ jsdap.loadData(url, callback [, proxy]);
 
 This reads the data from a `.dods` URL (http://example.com/dataset.dods?var1,var2&var3>0), returning it as a nested list. This is the data for the whole dataset, so the outer list corresponds to the dataset objects, and each contained list is the data of a given variable, an so on recursively.
 
+```js
+jsdap.loadDataAndDDS(url, callback [, proxy]);
+```
+
+This reads the data from a `.dods` URL (http://example.com/dataset.dods?var2,var1&var3>0), returning an object with a `dds` property containing a JavaScript object equivalent to the DDS for the given query, and a `data` property containing the requested data as a nested list. This can be useful when a projection changes the order of the returned data.
+
 ## Examples
 
 More detailed examples can be found in the `examples` folder, `examples/README.md` covers how to run them.
