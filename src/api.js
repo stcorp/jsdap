@@ -3,7 +3,11 @@ var jsdap = {};
 if (typeof require !== 'undefined' && module.exports) {
     parser = require('./parser');
     xdr = require('./xdr');
-    XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
+
+    //Workaround infinite recursion when jsdap is included in a webpack project
+    if (typeof XMLHttpRequest === 'undefined') {
+        XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
+    }
 }
 
 (function() {
