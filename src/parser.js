@@ -292,7 +292,7 @@ var parser = {};
 
             while (!this.peek(';')) {
                 if (type.toLowerCase() === 'string') {
-                    value = this.consume('"([^"]|\\")*"');
+                    value = this.consume('"(\\\\"|[^"])*"');
                 }
                 else if (type.toLowerCase() === 'url') {
                     value = this.consume('".*?[^\\\\]"|[^;,]+');

@@ -558,7 +558,7 @@ describe('parser functions', function() {
         });
 
         it('handles string members', function() {
-            var testString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_\\\\"/\\\'[](){}';
+            var testString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_\\"/\\\'[](){}';
 
             var testDAS = 'Attributes {TEST { String test_attr "' + testString + '"; }}';
 
