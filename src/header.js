@@ -1,5 +1,5 @@
 /*
- * jsDAP 5.0.0, a JavaScript OPeNDAP client.
+ * jsDAP 6.0.0, a JavaScript OPeNDAP client.
  *
  * You can find the uncompressed source at:
  *
