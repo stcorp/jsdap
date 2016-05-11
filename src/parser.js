@@ -15,7 +15,7 @@ var parser = {};
     var DDS_DATASET_ID_EXPRESSION = '(\\\\;|[^;])+'; //Ends with a semicolon
     var DDS_GRID_NAME_EXPRESSION = '(\\\\;|[^;])+'; //Ends with a semicolon
     var DDS_SEQUENCE_NAME_EXPRESSION = '(\\\\;|[^;])+'; //Ends with a semicolon
-    var DDS_STRUCTURE_NAME_EXPRESSION = '(\\\\;|[^;])+'; //Ends with a semicolon;
+    var DDS_STRUCTURE_NAME_EXPRESSION = '(\\\\;|[^;])+'; //Ends with a semicolon
 
     //DAS parsing expressions
     var DAS_ALIAS_EXPRESSION = '".*?[^\\\\]"|[^;,]+';
