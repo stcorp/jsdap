@@ -8,7 +8,7 @@ var parser = {};
 
     //Regular expressions
     //DDS parsing expressions
-    var DDS_BASE_TYPE_DIMENSION_NAME_EXPRESSION = '(\\\\=|[^=])+'; //Dimension name will end at the equals sign
+    var DDS_BASE_TYPE_DIMENSION_NAME_OR_VALUE_EXPRESSION = '(\\\\=|\\\\\\]|[^\\]=])+'; //Dimension name will end at the equals sign, or square bracket if value only
     var DDS_BASE_TYPE_DIMENSION_VALUE_EXPRESSION = '\\d+';
     var DDS_BASE_TYPE_EXPRESSION = '\\w+';
     var DDS_BASE_TYPE_NAME_EXPRESSION = '(\\\\;|\\\\\\[|[^\\[;])+'; //Type name ends with a square bracket or semicolon
@@ -140,7 +140,8 @@ var parser = {};
             baseType.shape = [];
             while (!this.peek(';')) {
                 this.consume('\\[');
-                var token = this.consume(DDS_BASE_TYPE_DIMENSION_NAME_EXPRESSION).trim();
+                var token = this.consume(DDS_BASE_TYPE_DIMENSION_NAME_OR_VALUE_EXPRESSION).trim();
+
                 if (this.peek('=')) {
                     baseType.dimensions.push(token);
                     this.consume('=');

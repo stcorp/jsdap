@@ -335,7 +335,7 @@ describe('parser functions', function() {
 
         it('handles special characters for non structured members', function() {
             var datasetNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 \\;-_"/\\\'[](){}';
-            var memberNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 \\;-_"/\\\'\\[]{}';
+            var memberNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 \\;-_"/\\\'\\[\\]{}';
 
             var testDDS = 'Dataset {Byte ' + memberNameString + '[' + memberNameString + ' = 12];} ' + datasetNameString + ';';
 
@@ -392,7 +392,7 @@ describe('parser functions', function() {
             var datasetNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 \\;-_"/\\\'[](){}';
             var gridNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 \\;-_"/\\\'\\[]{}';
             var arrayNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 \\;-_"/\\\'\\[]{}';
-            var dimensionNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 \\;-_"/\\\'\\[]{}';
+            var dimensionNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 \\;-_"/\\\'\\[\\]{}';
 
             var testDDS = 'Dataset {Grid {Array: Float32 ' + arrayNameString + '[' + dimensionNameString + ' = 12]; Maps: Float64 ' + dimensionNameString + '[' + dimensionNameString + ' = 12];} ' + gridNameString + ';} ' + datasetNameString + ';';
 
@@ -422,6 +422,28 @@ describe('parser functions', function() {
             testDapType.id = gridNameString;
 
             datasetDapType[gridNameString] = testDapType;
+
+            var result = new parser.ddsParser(testDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
+
+        it('handles multidimensional base types', function() {
+            var testDDS = 'Dataset {Byte TEST[12][34];} test%2Enc;';
+
+            var datasetDapType = new parser.dapType('Dataset');
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var testDapType = new parser.dapType('Byte');
+
+            testDapType.name = 'TEST';
+            testDapType.dimensions = [];
+            testDapType.shape = [12, 34];
+            testDapType.id = 'TEST';
+
+            datasetDapType.TEST = testDapType;
 
             var result = new parser.ddsParser(testDDS).parse();
 
