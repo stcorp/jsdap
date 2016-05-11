@@ -674,6 +674,75 @@ describe('parser functions', function() {
             expect(result).toEqual(datasetDapType);
         });
 
+        it('handles nan values', function() {
+            var testDAS = 'Attributes {TEST { Float64 test_attr NaN; }}';
+
+            var datasetDapType = new parser.dapType('Dataset');
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var testDapType = new parser.dapType('Byte');
+            testDapType.attributes = {test_attr: NaN};
+
+            testDapType.name = 'TEST';
+            testDapType.dimensions = [];
+            testDapType.shape = [];
+            testDapType.id = 'TEST';
+
+            datasetDapType.TEST = testDapType;
+
+            var result = new parser.dasParser(testDAS, testParsedDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
+
+        it('handles inf values', function() {
+            var testDAS = 'Attributes {TEST { Float64 test_attr Inf; }}';
+
+            var datasetDapType = new parser.dapType('Dataset');
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var testDapType = new parser.dapType('Byte');
+            testDapType.attributes = {test_attr: Infinity};
+
+            testDapType.name = 'TEST';
+            testDapType.dimensions = [];
+            testDapType.shape = [];
+            testDapType.id = 'TEST';
+
+            datasetDapType.TEST = testDapType;
+
+            var result = new parser.dasParser(testDAS, testParsedDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
+
+        it('handles -inf values', function() {
+            var testDAS = 'Attributes {TEST { Float64 test_attr -Inf; }}';
+
+            var datasetDapType = new parser.dapType('Dataset');
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var testDapType = new parser.dapType('Byte');
+            testDapType.attributes = {test_attr: -Infinity};
+
+            testDapType.name = 'TEST';
+            testDapType.dimensions = [];
+            testDapType.shape = [];
+            testDapType.id = 'TEST';
+
+            datasetDapType.TEST = testDapType;
+
+            var result = new parser.dasParser(testDAS, testParsedDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
+
         it('handles string members', function() {
             var testString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_\\"/\\\'[](){}';
 

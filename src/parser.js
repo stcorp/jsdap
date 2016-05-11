@@ -357,6 +357,12 @@ var parser = {};
                     if (value.toLowerCase() === 'nan') {
                         value = NaN;
                     }
+                    else if (value.toLowerCase() === 'inf') {
+                        value = Infinity;
+                    }
+                    else if (value.toLowerCase() === '-inf') {
+                        value = -Infinity;
+                    }
                     else {
                         value = pseudoSafeEval(value);
                     }
