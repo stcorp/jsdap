@@ -63,6 +63,7 @@ var parser = {};
         this.peek = function(expr) {
             var regExp = new RegExp('^' + expr, 'i');
             var m = this.stream.match(regExp);
+
             if (m) {
                 return m[0];
             }
@@ -74,6 +75,7 @@ var parser = {};
         this.consume = function(expr) {
             var regExp = new RegExp('^' + expr, 'i');
             var m = this.stream.match(regExp);
+
             if (m) {
                 this.stream = this.stream.substr(m[0].length).ltrim();
                 return m[0];
@@ -92,10 +94,12 @@ var parser = {};
 
             this.consume('dataset');
             this.consume('{');
+
             while (!this.peek('}')) {
                 var declaration = this._declaration();
                 dataset[declaration.name] = declaration;
             }
+
             this.consume('}');
 
             dataset.id = dataset.name = this.consume(DDS_DATASET_ID_EXPRESSION).trim();
@@ -105,23 +109,29 @@ var parser = {};
             function walk(dapvar, includeParent) {
                 for (var attr in dapvar) {
                     var child = dapvar[attr];
+
                     if (child.type) {
                         child.id = child.name;
+
                         if (includeParent) {
                             child.id = dapvar.id + '.' + child.id;
                         }
+
                         walk(child, true);
                     }
                 }
             }
+
             walk(dataset, false);
 
             return dataset;
         };
+
         this.parse = this._dataset;
 
         this._declaration = function() {
             var type = this.peek(DDS_BASE_TYPE_EXPRESSION).toLowerCase();
+
             switch (type) {
                 case 'grid'     : return this._grid();
                 case 'structure': return this._structure();
@@ -138,6 +148,7 @@ var parser = {};
 
             baseType.dimensions = [];
             baseType.shape = [];
+
             while (!this.peek(';')) {
                 this.consume('\\[');
                 var token = this.consume(DDS_BASE_TYPE_DIMENSION_NAME_OR_VALUE_EXPRESSION).trim();
@@ -147,9 +158,11 @@ var parser = {};
                     this.consume('=');
                     token = this.consume(DDS_BASE_TYPE_DIMENSION_VALUE_EXPRESSION).trim();
                 }
+
                 baseType.shape.push(parseInt(token));
                 this.consume('\\]');
             }
+
             this.consume(';');
 
             return baseType;
@@ -168,10 +181,12 @@ var parser = {};
             this.consume('maps');
             this.consume(':');
             grid.maps = {};
+
             while (!this.peek('}')) {
                 var map_ = this._base_declaration();
                 grid.maps[map_.name] = map_;
             }
+
             this.consume('}');
 
             grid.name = this.consume(DDS_GRID_NAME_EXPRESSION).trim();
@@ -185,10 +200,12 @@ var parser = {};
 
             this.consume('sequence');
             this.consume('{');
+
             while (!this.peek('}')) {
                 var declaration = this._declaration();
                 sequence[declaration.name] = declaration;
             }
+
             this.consume('}');
 
             sequence.name = this.consume(DDS_SEQUENCE_NAME_EXPRESSION).trim();
@@ -202,10 +219,12 @@ var parser = {};
 
             this.consume('structure');
             this.consume('{');
+
             while (!this.peek('}')) {
                 var declaration = this._declaration();
                 structure[declaration.name] = declaration;
             }
+
             this.consume('}');
 
             structure.name = this.consume(DDS_STRUCTURE_NAME_EXPRESSION).trim();
@@ -226,9 +245,11 @@ var parser = {};
 
             this.consume('attributes');
             this.consume('{');
+
             while (!this.peek('}')) {
                 this._attr_container();
             }
+
             this.consume('}');
 
             return this.dataset;
@@ -242,13 +263,15 @@ var parser = {};
                     for (map in this._target.maps) {
                         if (this.dataset[map]) {
                             var map = this._target.maps[map];
+
                             for (var name in map.attributes) {
                                 this.dataset[map].attributes[name] = map.attributes[name];
                             }
                         }
                     }
                 }
-            } else {
+            }
+            else {
                 this._container();
             }
         };
@@ -262,6 +285,7 @@ var parser = {};
             if (name.indexOf('.') > -1) {
                 var names = name.split('.');
                 target = this._target;
+
                 for (var i=0; i<names.length; i++) {
                     this._target = this._target[names[i]];
                 }
@@ -269,6 +293,7 @@ var parser = {};
                 while (!this.peek('}')) {
                     this._attr_container();
                 }
+
                 this.consume('}');
 
                 this._target = target;
@@ -280,6 +305,7 @@ var parser = {};
                 while (!this.peek('}')) {
                     this._attr_container();
                 }
+
                 this.consume('}');
 
                 this._target = target;
@@ -292,6 +318,7 @@ var parser = {};
 
         this._metadata = function() {
             var output = {};
+
             while (!this.peek('}')) {
                 if (ATOMIC_TYPES.contains(this.peek(DAS_TYPE_EXPRESSION).toLowerCase())) {
                     this._attribute(output);
@@ -303,6 +330,7 @@ var parser = {};
                     this.consume('}');
                 }
             }
+
             return output;
         };
 
@@ -336,6 +364,7 @@ var parser = {};
 
                     for (var i=0; i<tokens.length; i++) {
                         var token = tokens[i];
+
                         if (target[token]) {
                             target = target[token];
                         }
@@ -374,6 +403,7 @@ var parser = {};
                     this.consume(',');
                 }
             }
+
             this.consume(';');
 
             if (values.length === 1) {
