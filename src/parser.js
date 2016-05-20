@@ -244,11 +244,11 @@ var parser = {};
                 this._attribute(this._target.attributes);
 
                 if (this._target.type === 'Grid') {
-                    for (map in this._target.maps) {
+                    for (var map in this._target.maps) {
                         if (this.dataset[map]) {
-                            var map = this._target.maps[map];
+                            var target_map = this._target.maps[map];
 
-                            for (var name in map.attributes) {
+                            for (var name in target_map.attributes) {
                                 this.dataset[map].attributes[name] = map.attributes[name];
                             }
                         }
