@@ -221,7 +221,7 @@ var parser = {};
 
 
     parser.dasParser = function(das, dataset) {
-        this.stream = this.das = das;
+        this.stream = das;
         this.dataset = dataset;
 
         this.parse = function() {
