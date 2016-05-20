@@ -132,8 +132,8 @@ var parser = {};
 
             switch (type) {
                 case 'grid'     : return this._grid();
-                case 'structure': return this._structure();
-                case 'sequence' : return this._sequence();
+                case 'structure': return this._structure('Structure');
+                case 'sequence' : return this._structure('Sequence');
                 default         : return this._base_declaration();
             }
         };
@@ -192,28 +192,10 @@ var parser = {};
             return grid;
         };
 
-        this._sequence = function() {
-            var sequence = new parser.dapType('Sequence');
+        this._structure = function(type) {
+            var structure = new parser.dapType(type);
 
-            this.consume('sequence');
-            this.consume('{');
-
-            while (!this.peek('}')) {
-                var declaration = this._declaration();
-                sequence[declaration.name] = declaration;
-            }
-
-            this.consume('}');
-
-            sequence.name = this._name();
-
-            return sequence;
-        };
-
-        this._structure = function() {
-            var structure = new parser.dapType('Structure');
-
-            this.consume('structure');
+            this.consume(type);
             this.consume('{');
 
             while (!this.peek('}')) {
