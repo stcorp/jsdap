@@ -77,7 +77,7 @@ var xdr = {};
 
                 return out;
             }
-            else if (this._buf.slice(i, i+4) === START_OF_SEQUENCE) {
+            else if (this._buf.slice(i, i + 4) === START_OF_SEQUENCE) {
                 // This is a request for a base type variable inside a
                 // sequence.
                 mark = this._unpack_uint32();
@@ -123,7 +123,7 @@ var xdr = {};
                         case 'uint32' : func = '_unpack_uint32'; break;
                     }
 
-                    for (var i = 0; i < n; i++) {
+                    for (var i=0; i<n; i++) {
                         out.push(this[func]());
                     }
                 }
@@ -192,7 +192,7 @@ var xdr = {};
             var padding = (4 - (count % 4)) % 4;
             var bytes = [];
 
-            for (var c = 0; c < count; c++) {
+            for (var c=0; c<count; c++) {
                 bytes.push(this._unpack_byte());
             }
 
@@ -204,13 +204,13 @@ var xdr = {};
         this._unpack_string = function(count) {
             var strings = [];
 
-            for (var c = 0; c < count; c++) {
+            for (var c=0; c<count; c++) {
                 var n = this._unpack_uint32(); //Length of the string
                 var padding = (4 - (n % 4)) % 4;
 
                 var str = '';
 
-                for (var s = 0; s < n; s++) {
+                for (var s=0; s<n; s++) {
                     str += String.fromCharCode(this._unpack_byte());
                 }
 
@@ -227,12 +227,14 @@ var xdr = {};
         if (!shape.length) return array[0];
         var out = [];
         var size, start, stop;
+
         for (var i=0; i<shape[0]; i++) {
             size = array.length / shape[0];
             start = i * size;
             stop = start + size;
             out.push(reshape(array.slice(start, stop), shape.slice(1)));
         }
+
         return out;
     };
 
@@ -241,7 +243,7 @@ var xdr = {};
         var arrayBuffer = new ArrayBuffer(data.length);
         var dataView = new DataView(arrayBuffer);
 
-        for (var i = 0; i < data.length; i++) {
+        for (var i=0; i<data.length; i++) {
             dataView.setUint8(i, data.charCodeAt(i) & 0x00ff);
         }
 
