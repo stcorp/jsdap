@@ -187,8 +187,7 @@ var parser = {};
 
             this.consume('}');
 
-            grid.name = this.consume(DDS_NAME_EXPRESSION).trim();
-            this.consume(';');
+            grid.name = this._name();
 
             return grid;
         };
@@ -206,8 +205,7 @@ var parser = {};
 
             this.consume('}');
 
-            sequence.name = this.consume(DDS_NAME_EXPRESSION).trim();
-            this.consume(';');
+            sequence.name = this._name();
 
             return sequence;
         };
@@ -225,10 +223,16 @@ var parser = {};
 
             this.consume('}');
 
-            structure.name = this.consume(DDS_NAME_EXPRESSION).trim();
-            this.consume(';');
+            structure.name = this._name();
 
             return structure;
+        };
+
+        this._name = function() {
+            var name = this.consume(DDS_NAME_EXPRESSION).trim();
+            this.consume(';');
+
+            return name;
         };
     };
     parser.ddsParser.prototype = new simpleParser;
