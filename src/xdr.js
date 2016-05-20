@@ -15,7 +15,6 @@ var xdr = {};
         this._pos = 0; //Byte offset
 
         this.getValue = function() {
-            var i = this._pos;
             var dapvar = this.dapvar;
             var type = dapvar.type.toLowerCase();
             var out = [];
@@ -77,7 +76,7 @@ var xdr = {};
 
                 return out;
             }
-            else if (this._buf.slice(i, i + 4) === START_OF_SEQUENCE) {
+            else if (this._buf.slice(this._pos, this._pos + 4) === START_OF_SEQUENCE) {
                 // This is a request for a base type variable inside a
                 // sequence.
                 mark = this._unpack_uint32();
