@@ -87,7 +87,7 @@ var parser = {};
     }
 
     parser.ddsParser = function(dds) {
-        this.stream = this.dds = dds;
+        this.stream = dds;
 
         this._dataset = function() {
             var dataset = new parser.dapType('Dataset');
