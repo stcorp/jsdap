@@ -13,9 +13,7 @@ var parser = {};
     var DDS_BASE_TYPE_EXPRESSION = '\\w+';
     var DDS_BASE_TYPE_NAME_EXPRESSION = '(\\\\;|\\\\\\[|[^\\[;])+'; //Type name ends with a square bracket or semicolon
     var DDS_DATASET_ID_EXPRESSION = '(\\\\;|[^;])+'; //Ends with a semicolon
-    var DDS_GRID_NAME_EXPRESSION = '(\\\\;|[^;])+'; //Ends with a semicolon
-    var DDS_SEQUENCE_NAME_EXPRESSION = '(\\\\;|[^;])+'; //Ends with a semicolon
-    var DDS_STRUCTURE_NAME_EXPRESSION = '(\\\\;|[^;])+'; //Ends with a semicolon
+    var DDS_NAME_EXPRESSION = '(\\\\;|[^;])+'; //Ends with a semicolon
 
     //DAS parsing expressions
     var DAS_ALIAS_EXPRESSION = '".*?[^\\\\]"|[^;,]+';
@@ -189,7 +187,7 @@ var parser = {};
 
             this.consume('}');
 
-            grid.name = this.consume(DDS_GRID_NAME_EXPRESSION).trim();
+            grid.name = this.consume(DDS_NAME_EXPRESSION).trim();
             this.consume(';');
 
             return grid;
@@ -208,7 +206,7 @@ var parser = {};
 
             this.consume('}');
 
-            sequence.name = this.consume(DDS_SEQUENCE_NAME_EXPRESSION).trim();
+            sequence.name = this.consume(DDS_NAME_EXPRESSION).trim();
             this.consume(';');
 
             return sequence;
@@ -227,7 +225,7 @@ var parser = {};
 
             this.consume('}');
 
-            structure.name = this.consume(DDS_STRUCTURE_NAME_EXPRESSION).trim();
+            structure.name = this.consume(DDS_NAME_EXPRESSION).trim();
             this.consume(';');
 
             return structure;
