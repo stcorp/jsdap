@@ -249,7 +249,7 @@ var parser = {};
                             var target_map = this._target.maps[map];
 
                             for (var name in target_map.attributes) {
-                                this.dataset[map].attributes[name] = map.attributes[name];
+                                this.dataset[map].attributes[name] = target_map.attributes[name];
                             }
                         }
                     }
