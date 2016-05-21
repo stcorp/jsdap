@@ -6,7 +6,7 @@ if (typeof require !== 'undefined' && module.exports) {
 
     //Workaround infinite recursion when jsdap is included in a webpack project
     if (typeof XMLHttpRequest === 'undefined') {
-        XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
+        XMLHttpRequest = require('xhr2');
     }
 }
 
