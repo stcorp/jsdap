@@ -1,6 +1,6 @@
 {
     "name": "jsdap",
-    "version": "6.0.0",
+    "version": "6.0.1",
     "description": "A JavaScript OPeNDAP client",
     "repository": {
         "type": "git",
@@ -17,7 +17,7 @@
         "test": "karma start test/karma.conf.js && jasmine JASMINE_CONFIG_PATH=test/jasmine.json"
     },
     "dependencies": {
-        "xmlhttprequest": "^1.8.0"
+        "xhr2": "^0.1.3"
     },
     "devDependencies": {
         "eslint": "^1.7.3",
