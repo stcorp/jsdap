@@ -66,6 +66,9 @@ describe('api functions', function() {
                 }
             };
 
+            //Make a spy so we can make sure calls happen
+            spyOn(dummyXMLHttpRequest, 'open').and.callThrough();
+
             spyOn(parser, 'ddsParser').and.callFake(function() {
                 return dummyDDSParser;
             });
@@ -93,6 +96,8 @@ describe('api functions', function() {
             //Trigger the state changes
             dummyXMLHttpRequest.onreadystatechange();
             dummyXMLHttpRequest.onreadystatechange();
+
+            expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
 
         it('should make a correct XMLHttpRequest request when a proxy is defined', function() {
@@ -144,6 +149,9 @@ describe('api functions', function() {
                 }
             };
 
+            //Make a spy so we can make sure calls happen
+            spyOn(dummyXMLHttpRequest, 'open').and.callThrough();
+
             spyOn(parser, 'ddsParser').and.callFake(function() {
                 return dummyDDSParser;
             });
@@ -171,6 +179,8 @@ describe('api functions', function() {
             //Trigger the state changes
             dummyXMLHttpRequest.onreadystatechange();
             dummyXMLHttpRequest.onreadystatechange();
+
+            expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
     });
 
@@ -226,6 +236,9 @@ describe('api functions', function() {
                 dummyXMLHttpRequest.responseBody = dummyDODSResponse;
             };
 
+            //Make a spy so we can make sure calls happen
+            spyOn(dummyXMLHttpRequest, 'open').and.callThrough();
+
             spyOn(parser, 'ddsParser').and.callFake(function() {
                 return dummyDDSParser;
             });
@@ -252,6 +265,8 @@ describe('api functions', function() {
 
             //Trigger the state changes
             dummyXMLHttpRequest.onreadystatechange();
+
+            expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
 
         it('should make a correct XMLHttpRequest request using response property', function() {
@@ -290,6 +305,9 @@ describe('api functions', function() {
                 dummyXMLHttpRequest.response = dummyDODSResponse;
             };
 
+            //Make a spy so we can make sure calls happen
+            spyOn(dummyXMLHttpRequest, 'open').and.callThrough();
+
             spyOn(parser, 'ddsParser').and.callFake(function() {
                 return dummyDDSParser;
             });
@@ -316,6 +334,8 @@ describe('api functions', function() {
 
             //Trigger the state changes
             dummyXMLHttpRequest.onreadystatechange();
+
+            expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
 
         it('should make a correct XMLHttpRequest request using mozResponseArrayBuffer property', function() {
@@ -354,6 +374,9 @@ describe('api functions', function() {
                 dummyXMLHttpRequest.mozResponseArrayBuffer = dummyDODSResponse;
             };
 
+            //Make a spy so we can make sure calls happen
+            spyOn(dummyXMLHttpRequest, 'open').and.callThrough();
+
             spyOn(parser, 'ddsParser').and.callFake(function() {
                 return dummyDDSParser;
             });
@@ -380,6 +403,8 @@ describe('api functions', function() {
 
             //Trigger the state changes
             dummyXMLHttpRequest.onreadystatechange();
+
+            expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
 
         it('should make a correct XMLHttpRequest request using a proxy', function() {
@@ -419,6 +444,9 @@ describe('api functions', function() {
                 dummyXMLHttpRequest.responseBody = dummyDODSResponse;
             };
 
+            //Make a spy so we can make sure calls happen
+            spyOn(dummyXMLHttpRequest, 'open').and.callThrough();
+
             spyOn(parser, 'ddsParser').and.callFake(function() {
                 return dummyDDSParser;
             });
@@ -445,6 +473,8 @@ describe('api functions', function() {
 
             //Trigger the state changes
             dummyXMLHttpRequest.onreadystatechange();
+
+            expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
     });
 
@@ -500,6 +530,9 @@ describe('api functions', function() {
                 dummyXMLHttpRequest.responseBody = dummyDODSResponse;
             };
 
+            //Make a spy so we can make sure calls happen
+            spyOn(dummyXMLHttpRequest, 'open').and.callThrough();
+
             spyOn(parser, 'ddsParser').and.callFake(function() {
                 return dummyDDSParser;
             });
@@ -526,6 +559,8 @@ describe('api functions', function() {
 
             //Trigger the state changes
             dummyXMLHttpRequest.onreadystatechange();
+
+            expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
 
         it('should make a correct XMLHttpRequest request using response property', function() {
@@ -564,6 +599,9 @@ describe('api functions', function() {
                 dummyXMLHttpRequest.response = dummyDODSResponse;
             };
 
+            //Make a spy so we can make sure calls happen
+            spyOn(dummyXMLHttpRequest, 'open').and.callThrough();
+
             spyOn(parser, 'ddsParser').and.callFake(function() {
                 return dummyDDSParser;
             });
@@ -590,6 +628,8 @@ describe('api functions', function() {
 
             //Trigger the state changes
             dummyXMLHttpRequest.onreadystatechange();
+
+            expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
 
         it('should make a correct XMLHttpRequest request using mozResponseArrayBuffer property', function() {
@@ -628,6 +668,9 @@ describe('api functions', function() {
                 dummyXMLHttpRequest.mozResponseArrayBuffer = dummyDODSResponse;
             };
 
+            //Make a spy so we can make sure calls happen
+            spyOn(dummyXMLHttpRequest, 'open').and.callThrough();
+
             spyOn(parser, 'ddsParser').and.callFake(function() {
                 return dummyDDSParser;
             });
@@ -654,6 +697,8 @@ describe('api functions', function() {
 
             //Trigger the state changes
             dummyXMLHttpRequest.onreadystatechange();
+
+            expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
 
         it('should make a correct XMLHttpRequest request using a proxy', function() {
@@ -693,6 +738,9 @@ describe('api functions', function() {
                 dummyXMLHttpRequest.responseBody = dummyDODSResponse;
             };
 
+            //Make a spy so we can make sure calls happen
+            spyOn(dummyXMLHttpRequest, 'open').and.callThrough();
+
             spyOn(parser, 'ddsParser').and.callFake(function() {
                 return dummyDDSParser;
             });
@@ -719,6 +767,8 @@ describe('api functions', function() {
 
             //Trigger the state changes
             dummyXMLHttpRequest.onreadystatechange();
+
+            expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
     });
 });
