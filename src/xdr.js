@@ -19,10 +19,10 @@ var xdr = {};
             var type = dapvar.type.toLowerCase();
 
             if (type === 'structure' || type === 'dataset') {
-                return this._parse_structure();
+                return this._parse_structure(dapvar);
             }
             else if (type === 'grid') {
-                return this._parse_grid();
+                return this._parse_grid(dapvar);
             }
             else if (type === 'sequence') {
                 return this._parse_sequence();
@@ -35,7 +35,7 @@ var xdr = {};
             }
         };
 
-        this._parse_structure = function() {
+        this._parse_structure = function(dapvar) {
             var out = [];
             var tmp;
 
@@ -52,7 +52,7 @@ var xdr = {};
             return out;
         };
 
-        this._parse_grid = function() {
+        this._parse_grid = function(dapvar) {
             var out = [];
             var tmp;
 
@@ -80,7 +80,7 @@ var xdr = {};
 
             var mark = this._unpack_uint32();
 
-            dapvar = this.dapvar;
+            var dapvar = this.dapvar;
 
             while (mark !== 2768240640) {
                 var struct = [];
