@@ -17,114 +17,145 @@ var xdr = {};
         this.getValue = function() {
             var dapvar = this.dapvar;
             var type = dapvar.type.toLowerCase();
-            var out = [];
-            var tmp;
-            var mark;
 
             if (type === 'structure' || type === 'dataset') {
+                return this._parse_structure();
+            }
+            else if (type === 'grid') {
+                return this._parse_grid();
+            }
+            else if (type === 'sequence') {
+                return this._parse_sequence();
+            }
+            else if (this._buf.slice(this._pos, this._pos + 4) === START_OF_SEQUENCE) {
+                return this._parse_base_type_sequence();
+            }
+            else {
+                return this._parse_base_type(type);
+            }
+        };
+
+        this._parse_structure = function() {
+            var out = [];
+            var tmp;
+
+            for (var child in dapvar) {
+                if (dapvar[child].type) {
+                    this.dapvar = dapvar[child];
+                    tmp = this.getValue();
+                    out.push(tmp);
+                }
+            }
+
+            this.dapvar = dapvar;
+
+            return out;
+        };
+
+        this._parse_grid = function() {
+            var out = [];
+            var tmp;
+
+            this.dapvar = dapvar.array;
+
+            tmp = this.getValue();
+            out.push(tmp);
+
+            for (var map in dapvar.maps) {
+                if (dapvar.maps[map].type) {
+                    this.dapvar = dapvar.maps[map];
+                    tmp = this.getValue();
+                    out.push(tmp);
+                }
+            }
+
+            this.dapvar = dapvar;
+
+            return out;
+        };
+
+        this._parse_sequence = function() {
+            var out = [];
+            var tmp;
+
+            var mark = this._unpack_uint32();
+
+            dapvar = this.dapvar;
+
+            while (mark !== 2768240640) {
+                var struct = [];
+
                 for (var child in dapvar) {
                     if (dapvar[child].type) {
                         this.dapvar = dapvar[child];
                         tmp = this.getValue();
-                        out.push(tmp);
+                        struct.push(tmp);
                     }
                 }
 
-                this.dapvar = dapvar;
-
-                return out;
+                out.push(struct);
+                mark = this._unpack_uint32();
             }
-            else if (type === 'grid') {
-                this.dapvar = dapvar.array;
 
+            this.dapvar = dapvar;
+
+            return out;
+        };
+
+        this._parse_base_type_sequence = function() {
+            // This is a request for a base type variable inside a sequence.
+            var out = [];
+            var tmp;
+
+            var mark = this._unpack_uint32();
+
+            while (mark !== 2768240640) {
                 tmp = this.getValue();
                 out.push(tmp);
-
-                for (var map in dapvar.maps) {
-                    if (dapvar.maps[map].type) {
-                        this.dapvar = dapvar.maps[map];
-                        tmp = this.getValue();
-                        out.push(tmp);
-                    }
-                }
-
-                this.dapvar = dapvar;
-
-                return out;
-            }
-            else if (type === 'sequence') {
                 mark = this._unpack_uint32();
-
-                dapvar = this.dapvar;
-
-                while (mark !== 2768240640) {
-                    var struct = [];
-
-                    for (var child in dapvar) {
-                        if (dapvar[child].type) {
-                            this.dapvar = dapvar[child];
-                            tmp = this.getValue();
-                            struct.push(tmp);
-                        }
-                    }
-
-                    out.push(struct);
-                    mark = this._unpack_uint32();
-                }
-
-                this.dapvar = dapvar;
-
-                return out;
             }
-            else if (this._buf.slice(this._pos, this._pos + 4) === START_OF_SEQUENCE) {
-                // This is a request for a base type variable inside a
-                // sequence.
-                mark = this._unpack_uint32();
 
-                while (mark !== 2768240640) {
-                    tmp = this.getValue();
-                    out.push(tmp);
-                    mark = this._unpack_uint32();
+            return out;
+        };
+
+        this._parse_base_type = function(type) {
+            //Numeric or string type
+            var out = [];
+
+            var n = 1;
+
+            if (this.dapvar.shape.length) {
+                n = this._unpack_uint32();
+
+                if (type !== 'url' && type !== 'string') {
+                    this._unpack_uint32(); //Throw away a start?
                 }
-                return out;
+            }
+
+            if (type === 'byte') {
+                out = this._unpack_bytes(n);
+            }
+            else if (type === 'url' || type === 'string') {
+                out = this._unpack_string(n);
             }
             else {
-                //Numeric or string type
-                var n = 1;
+                out = [];
 
-                if (this.dapvar.shape.length) {
-                    n = this._unpack_uint32();
+                var func;
 
-                    if (type !== 'url' && type !== 'string') {
-                        this._unpack_uint32(); //Throw away a start?
-                    }
+                switch (type) {
+                    case 'float32': func = '_unpack_float32'; break;
+                    case 'float64': func = '_unpack_float64'; break;
+                    case 'int'    : func = '_unpack_int32'; break;
+                    case 'uint'   : func = '_unpack_uint32'; break;
+                    case 'int16'  : func = '_unpack_int16'; break;
+                    case 'uint16' : func = '_unpack_uint16'; break;
+                    case 'int32'  : func = '_unpack_int32'; break;
+                    case 'uint32' : func = '_unpack_uint32'; break;
                 }
 
-                if (type === 'byte') {
-                    out = this._unpack_bytes(n);
-                }
-                else if (type === 'url' || type === 'string') {
-                    out = this._unpack_string(n);
-                }
-                else {
-                    out = [];
-
-                    var func;
-
-                    switch (type) {
-                        case 'float32': func = '_unpack_float32'; break;
-                        case 'float64': func = '_unpack_float64'; break;
-                        case 'int'    : func = '_unpack_int32'; break;
-                        case 'uint'   : func = '_unpack_uint32'; break;
-                        case 'int16'  : func = '_unpack_int16'; break;
-                        case 'uint16' : func = '_unpack_uint16'; break;
-                        case 'int32'  : func = '_unpack_int32'; break;
-                        case 'uint32' : func = '_unpack_uint32'; break;
-                    }
-
-                    for (var i=0; i<n; i++) {
-                        out.push(this[func]());
-                    }
+                for (var i=0; i<n; i++) {
+                    out.push(this[func]());
                 }
             }
 
