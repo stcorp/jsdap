@@ -15,14 +15,13 @@ var xdr = {};
         this._pos = 0; //Byte offset
 
         this.getValue = function() {
-            var dapvar = this.dapvar;
-            var type = dapvar.type.toLowerCase();
+            var type = this.dapvar.type.toLowerCase();
 
             if (type === 'structure' || type === 'dataset') {
-                return this._parse_structure(dapvar);
+                return this._parse_structure();
             }
             else if (type === 'grid') {
-                return this._parse_grid(dapvar);
+                return this._parse_grid();
             }
             else if (type === 'sequence') {
                 return this._parse_sequence();
@@ -35,9 +34,11 @@ var xdr = {};
             }
         };
 
-        this._parse_structure = function(dapvar) {
+        this._parse_structure = function() {
             var out = [];
             var tmp;
+
+            var dapvar = this.dapvar;
 
             for (var child in dapvar) {
                 if (dapvar[child].type) {
@@ -52,9 +53,11 @@ var xdr = {};
             return out;
         };
 
-        this._parse_grid = function(dapvar) {
+        this._parse_grid = function() {
             var out = [];
             var tmp;
+
+            var dapvar = this.dapvar;
 
             this.dapvar = dapvar.array;
 
