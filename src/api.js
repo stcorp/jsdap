@@ -36,6 +36,7 @@ if (typeof require !== 'undefined' && module.exports) {
                        xml.responseBody             //XHR2
                     || xml.response                 //FF7/Chrome 11-15
                     || xml.mozResponseArrayBuffer;  //FF5
+
                 callback(buf);
             }
             else {
@@ -43,7 +44,7 @@ if (typeof require !== 'undefined' && module.exports) {
             }
         };
 
-        xml.send('');
+        xml.send(null);
     };
 
     var dodsRequest = function(url, callback) {
