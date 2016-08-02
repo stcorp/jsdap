@@ -15,8 +15,6 @@ describe('api functions', function() {
         globalReference = global; //Node.js
     }
 
-    var XML_READY_STATE_DONE = 4;
-
     describe('jsdap loadDataset', function() {
         it('should make a correct XMLHttpRequest request', function() {
             var dummyXMLHttpRequest = Object();
@@ -40,10 +38,8 @@ describe('api functions', function() {
                     };
 
                     dummyXMLHttpRequest.send = function(data) {
-                        expect(data).toEqual('');
+                        expect(data).toEqual(null);
                     };
-
-                    dummyXMLHttpRequest.readyState = XML_READY_STATE_DONE;
 
                     dummyXMLHttpRequest.responseText = 'dummyDDSResponseBody';
                 }
@@ -54,10 +50,8 @@ describe('api functions', function() {
                     };
 
                     dummyXMLHttpRequest.send = function(data) {
-                        expect(data).toEqual('');
+                        expect(data).toEqual(null);
                     };
-
-                    dummyXMLHttpRequest.readyState = XML_READY_STATE_DONE;
 
                     dummyXMLHttpRequest.responseText = 'dummyDASResponseBody';
                 }
@@ -94,8 +88,8 @@ describe('api functions', function() {
             jsdap.loadDataset(dummyUrl, dummyCallback, null);
 
             //Trigger the state changes
-            dummyXMLHttpRequest.onreadystatechange();
-            dummyXMLHttpRequest.onreadystatechange();
+            dummyXMLHttpRequest.onload();
+            dummyXMLHttpRequest.onload();
 
             expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
@@ -123,10 +117,8 @@ describe('api functions', function() {
                     };
 
                     dummyXMLHttpRequest.send = function(data) {
-                        expect(data).toEqual('');
+                        expect(data).toEqual(null);
                     };
-
-                    dummyXMLHttpRequest.readyState = XML_READY_STATE_DONE;
 
                     dummyXMLHttpRequest.responseText = 'dummyDDSResponseBody';
                 }
@@ -137,10 +129,8 @@ describe('api functions', function() {
                     };
 
                     dummyXMLHttpRequest.send = function(data) {
-                        expect(data).toEqual('');
+                        expect(data).toEqual(null);
                     };
-
-                    dummyXMLHttpRequest.readyState = XML_READY_STATE_DONE;
 
                     dummyXMLHttpRequest.responseText = 'dummyDASResponseBody';
                 }
@@ -177,8 +167,8 @@ describe('api functions', function() {
             jsdap.loadDataset(dummyUrl, dummyCallback, dummyProxy);
 
             //Trigger the state changes
-            dummyXMLHttpRequest.onreadystatechange();
-            dummyXMLHttpRequest.onreadystatechange();
+            dummyXMLHttpRequest.onload();
+            dummyXMLHttpRequest.onload();
 
             expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
@@ -228,10 +218,8 @@ describe('api functions', function() {
                 };
 
                 dummyXMLHttpRequest.send = function(data) {
-                    expect(data).toEqual('');
+                    expect(data).toEqual(null);
                 };
-
-                dummyXMLHttpRequest.readyState = XML_READY_STATE_DONE;
 
                 dummyXMLHttpRequest.responseBody = dummyDODSResponse;
             };
@@ -264,7 +252,7 @@ describe('api functions', function() {
             jsdap.loadData(dummyUrl, dummyCallback, null);
 
             //Trigger the state changes
-            dummyXMLHttpRequest.onreadystatechange();
+            dummyXMLHttpRequest.onload();
 
             expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
@@ -297,10 +285,8 @@ describe('api functions', function() {
                 };
 
                 dummyXMLHttpRequest.send = function(data) {
-                    expect(data).toEqual('');
+                    expect(data).toEqual(null);
                 };
-
-                dummyXMLHttpRequest.readyState = XML_READY_STATE_DONE;
 
                 dummyXMLHttpRequest.response = dummyDODSResponse;
             };
@@ -333,7 +319,7 @@ describe('api functions', function() {
             jsdap.loadData(dummyUrl, dummyCallback, null);
 
             //Trigger the state changes
-            dummyXMLHttpRequest.onreadystatechange();
+            dummyXMLHttpRequest.onload();
 
             expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
@@ -366,10 +352,8 @@ describe('api functions', function() {
                 };
 
                 dummyXMLHttpRequest.send = function(data) {
-                    expect(data).toEqual('');
+                    expect(data).toEqual(null);
                 };
-
-                dummyXMLHttpRequest.readyState = XML_READY_STATE_DONE;
 
                 dummyXMLHttpRequest.mozResponseArrayBuffer = dummyDODSResponse;
             };
@@ -402,7 +386,7 @@ describe('api functions', function() {
             jsdap.loadData(dummyUrl, dummyCallback, null);
 
             //Trigger the state changes
-            dummyXMLHttpRequest.onreadystatechange();
+            dummyXMLHttpRequest.onload();
 
             expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
@@ -436,10 +420,8 @@ describe('api functions', function() {
                 };
 
                 dummyXMLHttpRequest.send = function(data) {
-                    expect(data).toEqual('');
+                    expect(data).toEqual(null);
                 };
-
-                dummyXMLHttpRequest.readyState = XML_READY_STATE_DONE;
 
                 dummyXMLHttpRequest.responseBody = dummyDODSResponse;
             };
@@ -472,7 +454,7 @@ describe('api functions', function() {
             jsdap.loadData(dummyUrl, dummyCallback, dummyProxy);
 
             //Trigger the state changes
-            dummyXMLHttpRequest.onreadystatechange();
+            dummyXMLHttpRequest.onload();
 
             expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
@@ -522,10 +504,8 @@ describe('api functions', function() {
                 };
 
                 dummyXMLHttpRequest.send = function(data) {
-                    expect(data).toEqual('');
+                    expect(data).toEqual(null);
                 };
-
-                dummyXMLHttpRequest.readyState = XML_READY_STATE_DONE;
 
                 dummyXMLHttpRequest.responseBody = dummyDODSResponse;
             };
@@ -558,7 +538,7 @@ describe('api functions', function() {
             jsdap.loadDataAndDDS(dummyUrl, dummyCallback, null);
 
             //Trigger the state changes
-            dummyXMLHttpRequest.onreadystatechange();
+            dummyXMLHttpRequest.onload();
 
             expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
@@ -591,10 +571,8 @@ describe('api functions', function() {
                 };
 
                 dummyXMLHttpRequest.send = function(data) {
-                    expect(data).toEqual('');
+                    expect(data).toEqual(null);
                 };
-
-                dummyXMLHttpRequest.readyState = XML_READY_STATE_DONE;
 
                 dummyXMLHttpRequest.response = dummyDODSResponse;
             };
@@ -627,7 +605,7 @@ describe('api functions', function() {
             jsdap.loadDataAndDDS(dummyUrl, dummyCallback, null);
 
             //Trigger the state changes
-            dummyXMLHttpRequest.onreadystatechange();
+            dummyXMLHttpRequest.onload();
 
             expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
@@ -660,10 +638,8 @@ describe('api functions', function() {
                 };
 
                 dummyXMLHttpRequest.send = function(data) {
-                    expect(data).toEqual('');
+                    expect(data).toEqual(null);
                 };
-
-                dummyXMLHttpRequest.readyState = XML_READY_STATE_DONE;
 
                 dummyXMLHttpRequest.mozResponseArrayBuffer = dummyDODSResponse;
             };
@@ -696,7 +672,7 @@ describe('api functions', function() {
             jsdap.loadDataAndDDS(dummyUrl, dummyCallback, null);
 
             //Trigger the state changes
-            dummyXMLHttpRequest.onreadystatechange();
+            dummyXMLHttpRequest.onload();
 
             expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
@@ -730,10 +706,8 @@ describe('api functions', function() {
                 };
 
                 dummyXMLHttpRequest.send = function(data) {
-                    expect(data).toEqual('');
+                    expect(data).toEqual(null);
                 };
-
-                dummyXMLHttpRequest.readyState = XML_READY_STATE_DONE;
 
                 dummyXMLHttpRequest.responseBody = dummyDODSResponse;
             };
@@ -766,7 +740,7 @@ describe('api functions', function() {
             jsdap.loadDataAndDDS(dummyUrl, dummyCallback, dummyProxy);
 
             //Trigger the state changes
-            dummyXMLHttpRequest.onreadystatechange();
+            dummyXMLHttpRequest.onload();
 
             expect(dummyXMLHttpRequest.open).toHaveBeenCalled();
         });
