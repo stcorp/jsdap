@@ -834,5 +834,28 @@ describe('parser functions', function() {
 
             expect(result).toEqual(datasetDapType);
         });
+
+        it('handles string attributes with special characters followed by string attributes with regular characters', function() {
+            var testDAS = 'Attributes {TEST { String test_attr1 "C:\\"; String test_attr2 "60";}}';
+
+            var datasetDapType = new parser.dapType('Dataset');
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var testDapType = new parser.dapType('Byte');
+            testDapType.attributes = {test_attr1: 'C:\\', test_attr2: '60'};
+
+            testDapType.name = 'TEST';
+            testDapType.dimensions = [];
+            testDapType.shape = [];
+            testDapType.id = 'TEST';
+
+            datasetDapType.TEST = testDapType;
+
+            var result = new parser.dasParser(testDAS, testParsedDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
     });
 });
