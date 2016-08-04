@@ -26,6 +26,11 @@ env:
   jasmine: true
 globals:
   __DEV__: true
+  module: true
 extends: 'eslint:recommended'
+parserOptions:
+  sourceType: module
+  ecmaFeatures:
+    module: true
 plugins:
   - jasmine
