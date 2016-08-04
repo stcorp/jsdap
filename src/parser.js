@@ -22,7 +22,7 @@ var parser = {};
     var DAS_CONTAINER_NAME_EXPRESSION = '(\\\\{|[^{])+';
     var DAS_METADATA_NAME_EXPRESSION = '(\\\\{|[^{])+';
     var DAS_NUMERICAL_EXPRESSION = '".*?[^\\\\]"|[^;,]+';
-    var DAS_STRING_EXPRESSION = '"(\\\\"|[^"])*"'; //Ends with a double quote
+    var DAS_STRING_EXPRESSION = '"(\\\\\\\\|\\\\"|[^"])*"'; //Ends with a double quote
     var DAS_TYPE_EXPRESSION = '\\w+';
     var DAS_URL_EXPRESSION = '".*?[^\\\\]"|[^;,]+';
 

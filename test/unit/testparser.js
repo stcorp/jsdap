@@ -794,7 +794,7 @@ describe('parser functions', function() {
         it('handles special characters in attribute names', function() {
             var datasetNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_"/\\\'[]()\\{}';
             var attributeNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\\ abcdefghijklmnopqrstuvwxyz\\ 0123456789\\ ;-_"/\\\'[](){}';
-            var testString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_\\\\"/\\\'[](){}';
+            var testString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_\\\\\\"/\\\'[](){}';
 
             var testDAS = 'Attributes {' + datasetNameString + ' { String ' + attributeNameString + ' "' + testString + '"; }}';
 
