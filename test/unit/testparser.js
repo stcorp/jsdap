@@ -794,7 +794,7 @@ describe('parser functions', function() {
         it('handles special characters in attribute names', function() {
             var datasetNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_"/\\\'[]()\\{}';
             var attributeNameString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\\ abcdefghijklmnopqrstuvwxyz\\ 0123456789\\ ;-_"/\\\'[](){}';
-            var testString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_\\\\"/\\\'[](){}';
+            var testString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 ;-_\\\\\\"/\\\'[](){}';
 
             var testDAS = 'Attributes {' + datasetNameString + ' { String ' + attributeNameString + ' "' + testString + '"; }}';
 
@@ -829,6 +829,46 @@ describe('parser functions', function() {
 
             parsedDDS.attributes = {};
             parsedDDS[datasetNameString] = ddsDapType;
+
+            var result = new parser.dasParser(testDAS, parsedDDS).parse();
+
+            expect(result).toEqual(datasetDapType);
+        });
+
+        it('handles string attributes with special characters followed by string attributes with regular characters', function() {
+            var testDAS = 'Attributes {TEST { String test_attr1 "C:\\\\"; String test_attr2 "60";}}';
+
+            var datasetDapType = new parser.dapType('Dataset');
+
+            datasetDapType.name = 'test%2Enc';
+            datasetDapType.id = 'test%2Enc';
+
+            var testDapType = new parser.dapType('String');
+            testDapType.attributes = {test_attr1: '"C:\\\\"', test_attr2: '"60"'};
+
+            testDapType.name = 'TEST';
+            testDapType.dimensions = [];
+            testDapType.shape = [];
+            testDapType.id = 'TEST';
+
+            datasetDapType.TEST = testDapType;
+
+            //Also create a parsed DDS
+            var parsedDDS = new parser.dapType('Dataset');
+
+            parsedDDS.name = 'test%2Enc';
+            parsedDDS.id = 'test%2Enc';
+
+            var ddsDapType = new parser.dapType('String');
+
+            ddsDapType.name = 'TEST';
+            ddsDapType.dimensions = [];
+            ddsDapType.shape = [];
+            ddsDapType.id = 'TEST';
+
+            parsedDDS.attributes = {};
+            parsedDDS['TEST'] = ddsDapType;
+
 
             var result = new parser.dasParser(testDAS, parsedDDS).parse();
 
