@@ -271,18 +271,6 @@ var xdr = {};
         return out;
     };
 
-    xdr.getBuffer = function(data) {
-        //Converts data to an ArrayBuffer
-        var arrayBuffer = new ArrayBuffer(data.length);
-        var dataView = new DataView(arrayBuffer);
-
-        for (var i=0; i<data.length; i++) {
-            dataView.setUint8(i, data.charCodeAt(i) & 0x00ff);
-        }
-
-        return arrayBuffer;
-    };
-
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = xdr;
     }
