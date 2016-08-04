@@ -13,8 +13,6 @@ if (typeof require !== 'undefined' && module.exports) {
 (function() {
     'use strict';
 
-    var XML_READY_STATE_DONE = 4;
-
     var proxyUrl = function(url, callback, binary) {
         var xml = new XMLHttpRequest();
 
@@ -32,21 +30,21 @@ if (typeof require !== 'undefined' && module.exports) {
             }
         }
 
-        xml.onreadystatechange = function() {
-            if (xml.readyState === XML_READY_STATE_DONE) {
-                if (binary) {
-                    var buf =
-                           xml.responseBody             //XHR2
-                        || xml.response                 //FF7/Chrome 11-15
-                        || xml.mozResponseArrayBuffer;  //FF5
-                    callback(buf);
-                }
-                else {
-                    callback(xml.responseText);
-                }
+        xml.onload = function() {
+            if (binary) {
+                var buf =
+                       xml.responseBody             //XHR2
+                    || xml.response                 //FF7/Chrome 11-15
+                    || xml.mozResponseArrayBuffer;  //FF5
+
+                callback(buf);
+            }
+            else {
+                callback(xml.responseText);
             }
         };
-        xml.send('');
+
+        xml.send(null);
     };
 
     var dodsRequest = function(url, callback) {
