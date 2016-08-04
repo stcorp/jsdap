@@ -90,3 +90,7 @@ Unit tests are written with [Jasmine](http://jasmine.github.io/) and run by the 
 ## License
 
 Jsdap is (c) 2007--2009 Roberto De Almeida, licensed under the MIT license.
+
+## References
+
+* [The Data Access Protocol - DAP 2.0](https://earthdata.nasa.gov/files/ESE-RFC-004v1.1.pdf) (Caution, PDF link)
