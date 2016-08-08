@@ -9,4 +9,5 @@ npm-debug.log
 # Compiled source #
 ###################
 jsdap.js
-jsdap.min.js
+jsdap-*.js
+jsdap-*.min.js

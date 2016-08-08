@@ -1,6 +1,6 @@
 {
     "name": "jsdap",
-    "version": "8.0.0",
+    "version": "8.1.0",
     "description": "A JavaScript OPeNDAP client",
     "repository": {
         "type": "git",
@@ -10,9 +10,9 @@
     "homepage": "https://bitbucket.org/jetfuse/jsdap",
     "main": "src/api.js",
     "scripts": {
-        "build": "npm run beautify && npm run minify && cp jsdap.js examples/js",
-        "beautify": "uglifyjs src/header.js src/parser.js src/xdr.js src/api.js src/polyfill.js --comments all -b -o jsdap.js",
-        "minify": "uglifyjs src/header.js src/parser.js src/xdr.js src/api.js src/polyfill.js -o jsdap.min.js",
+        "build": "npm run beautify && npm run minify && cp jsdap-$npm_package_version.js examples/js/jsdap.js",
+        "beautify": "uglifyjs src/header.js src/parser.js src/xdr.js src/api.js src/polyfill.js --comments all -b -o jsdap-$npm_package_version.js",
+        "minify": "uglifyjs src/header.js src/parser.js src/xdr.js src/api.js src/polyfill.js -o jsdap-$npm_package_version.min.js",
         "examples": "node examples/server.js",
         "test": "karma start test/karma.conf.js && jasmine JASMINE_CONFIG_PATH=test/jasmine.json"
     },

@@ -1,3 +1,6 @@
+8.1.0 (Mon Aug 8 10:38:22 BRT 2016):
+    Build versioned files.
+
 8.0.0 (Thu Aug 4 13:46:48 BRT 2016):
     Fix parsing of escaped forward slashes in DAS.
     Remove getBuffer function.
