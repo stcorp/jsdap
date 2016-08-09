@@ -9,13 +9,7 @@ For use with [Node.js](https://nodejs.org/en/), simply install using npm:
     :::bash
     $ npm install jsdap
 
-For use with a browser, the source must be checked out from [the git repository](https://bitbucket.org/jetfuse/jsdap). After checking out the source code, install the dev dependencies and use npm to compile the source:
-
-    :::bash
-    $ npm install
-    $ npm run build
-
-This should generate `jsdap.js` and the minified `jsdap.min.js` in the project root. These files can used directly by the browser.
+Precompiled files for drop in usage in the browser are provided on the [downloads page](https://bitbucket.org/jetfuse/jsdap/downloads).
 
 ## Use
 
@@ -52,7 +46,7 @@ Dods data is parsed using an [ArrayBuffer](https://developer.mozilla.org/en-US/d
 
 ## Development
 
-Jsdap is composed of 3 separate files: `parser.js`, `xdr.js`, and `api.js`. They are located within the `src` directory.
+The source can be checked out from [the git repository](https://bitbucket.org/jetfuse/jsdap).
 
 It is recommended to develop in a [virtualenv](https://virtualenv.pypa.io/) with [nodeenv](https://github.com/ekalinin/nodeenv) installed:
 
@@ -74,13 +68,12 @@ Checkout the source and install the requirements in the nodeenv:
     $ cd jsdap
     $ npm install
 
-To get started with development install the dev dependencies:
-
 You may wish to link [eslint](http://eslint.org/) into your path for JavaScript linting, assuming development inside a [nodeenv](https://github.com/ekalinin/nodeenv):
 
     :::bash
     $ ln -s --relative node_modules/eslint/bin/eslint.js ../bin/eslint
 
+Jsdap is composed of 3 separate files: `parser.js`, `xdr.js`, and `api.js`. They are located within the `src` directory.
 
 Unit tests are written with [Jasmine](http://jasmine.github.io/) and run by the [Karma](http://karma-runner.github.io) test runner. Tests are run against Firefox, Chrome, and Node.js. They can be run using npm:
 
