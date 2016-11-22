@@ -328,6 +328,8 @@ var parser = {};
             while (!this.peek(';')) {
                 if (type.toLowerCase() === 'string') {
                     value = this.consume(DAS_STRING_EXPRESSION).trim();
+		    // trim the double quotes from the match
+		    value = value.substr(1, value.length - 2);
                 }
                 else if (type.toLowerCase() === 'url') {
                     value = this.consume(DAS_URL_EXPRESSION).trim();
