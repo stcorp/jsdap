@@ -1,10 +1,10 @@
 {
     "name": "jsdap",
-    "version": "8.1.0",
+    "version": "8.1.1",
     "description": "A JavaScript OPeNDAP client",
     "repository": {
         "type": "git",
-        "url": "git+ssh://git@bitbucket.org:jetfuse/jsdap.git"
+        "url": "git+ssh://git@github.com:stcorp/jsdap.git"
     },
     "license": "MIT",
     "homepage": "https://bitbucket.org/jetfuse/jsdap",
