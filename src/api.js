@@ -111,6 +111,28 @@ if (typeof require !== 'undefined' && module.exports) {
         });
     };
 
+    jsdap.loadDDS = function(url, callback, proxy) {
+         //User proxy?
+        if (proxy) url = proxy + '?url=' + encodeURIComponent(url);
+
+        //Load DDS
+        proxyUrl(url, function(dds) {
+            var dapvar = new parser.ddsParser(dds).parse();
+            callback(dapvar);
+        });
+    }
+
+    jsdap.loadDAS = function(url, dds, callback, proxy) {
+        //User proxy?
+        if (proxy) url = proxy + '?url=' + encodeURIComponent(url);
+
+        //Load DAS
+        proxyUrl(url, function(das) {
+            var dataset = new parser.dasParser(das, dds).parse();
+            callback(dataset);
+        });
+    }
+
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = jsdap;
     }
