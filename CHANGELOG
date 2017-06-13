@@ -1,3 +1,9 @@
+8.2.0 (Jun 13, 2017, 11:25 AM GMT+2):
+    Add separate loadDDS and loadDAS functions to API
+
+8.1.1 (Nov 23, 2016, 3:28 PM GMT+1):
+    Fix parsing of string attributes
+
 8.1.0 (Mon Aug 8 10:38:22 BRT 2016):
     Build versioned files.
 
