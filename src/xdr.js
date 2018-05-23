@@ -151,8 +151,8 @@ var xdr = {};
                     case 'float64': func = '_unpack_float64'; break;
                     case 'int'    : func = '_unpack_int32'; break;
                     case 'uint'   : func = '_unpack_uint32'; break;
-                    case 'int16'  : func = '_unpack_int16'; break;
-                    case 'uint16' : func = '_unpack_uint16'; break;
+                    case 'int16'  : func = '_unpack_int32'; break;
+                    case 'uint16' : func = '_unpack_uint32'; break;
                     case 'int32'  : func = '_unpack_int32'; break;
                     case 'uint32' : func = '_unpack_uint32'; break;
                 }
@@ -179,25 +179,11 @@ var xdr = {};
             return this._view.getUint8(startPos);
         };
 
-        this._unpack_uint16 = function() {
-            var startPos = this._pos;
-            this._pos += 2; //Increment the byte counter
-
-            return this._view.getUint16(startPos);
-        };
-
         this._unpack_uint32 = function() {
             var startPos = this._pos;
             this._pos += 4; //Increment the byte counter
 
             return this._view.getUint32(startPos);
-        };
-
-        this._unpack_int16 = function() {
-            var startPos = this._pos;
-            this._pos += 2; //Increment the byte counter
-
-            return this._view.getInt16(startPos);
         };
 
         this._unpack_int32 = function() {
