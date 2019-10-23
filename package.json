@@ -1,6 +1,6 @@
 {
     "name": "jsdap",
-    "version": "8.2.0",
+    "version": "9.0.0",
     "description": "A JavaScript OPeNDAP client",
     "repository": {
         "type": "git",
