@@ -147,18 +147,27 @@ var xdr = {};
                 var func;
 
                 switch (type) {
-                    case 'float32': func = '_unpack_float32'; break;
-                    case 'float64': func = '_unpack_float64'; break;
-                    case 'int'    : func = '_unpack_int32'; break;
-                    case 'uint'   : func = '_unpack_uint32'; break;
-                    case 'int16'  : func = '_unpack_int32'; break;
-                    case 'uint16' : func = '_unpack_uint32'; break;
-                    case 'int32'  : func = '_unpack_int32'; break;
-                    case 'uint32' : func = '_unpack_uint32'; break;
+                    case 'float64': func = '_unpack_float64'; out = new Float64Array(n); break;
+
+                    case 'float32': func = '_unpack_float32'; out = new Float32Array(n); break;
+
+                    case 'int':
+                    case 'int32'  : func = '_unpack_int32'; out = new Int32Array(n); break;
+
+                    case 'uint'   :
+                    case 'uint32' : func = '_unpack_uint32'; out = new Uint32Array(n); break;
+
+                    case 'int16'  : func = '_unpack_int32'; out = new Int16Array(n); break;
+
+                    case 'uint16' : func = '_unpack_uint32'; out = new Uint16Array(n); break;
+
+                    case 'int8'  : func = '_unpack_int32'; out = new Int8Array(n); break;
+
+                    case 'uint8' : func = '_unpack_uint32'; out = new Uint8Array(n); break;
                 }
 
                 for (var i=0; i<n; i++) {
-                    out.push(this[func]());
+                    out[i] = this[func]();
                 }
             }
 
