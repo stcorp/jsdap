@@ -120,7 +120,7 @@ if (typeof require !== 'undefined' && module.exports) {
             var dapvar = new parser.ddsParser(dds).parse();
             callback(dapvar);
         });
-    }
+    };
 
     jsdap.loadDAS = function(url, dds, callback, proxy) {
         //User proxy?
@@ -131,7 +131,7 @@ if (typeof require !== 'undefined' && module.exports) {
             var dataset = new parser.dasParser(das, dds).parse();
             callback(dataset);
         });
-    }
+    };
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = jsdap;
