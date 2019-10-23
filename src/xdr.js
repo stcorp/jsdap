@@ -35,7 +35,7 @@ var xdr = {};
         };
 
         this._parse_structure = function() {
-            var out = [];
+            var out = {};
             var tmp;
 
             var dapvar = this.dapvar;
@@ -44,7 +44,7 @@ var xdr = {};
                 if (dapvar[child].type) {
                     this.dapvar = dapvar[child];
                     tmp = this.getValue();
-                    out.push(tmp);
+                    out[child] = tmp;
                 }
             }
 
