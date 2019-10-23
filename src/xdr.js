@@ -253,6 +253,7 @@ var xdr = {};
 
     var reshape = function(array, shape) {
         if (!shape.length) return array[0];
+        if (shape.length === 1) return array.slice(0, shape[0]);
         var out = [];
         var size, start, stop;
 
