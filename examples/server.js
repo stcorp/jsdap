@@ -2,7 +2,7 @@ var path = require('path');
 
 //Required for setting up a proxy
 var express = require('express');
-var request = require('request');
+var fetch = import('node-fetch');
 
 var app = new express();
 var port = 3000;
@@ -13,7 +13,7 @@ app.use(express.static('examples'));
 app.use('/proxy', function(req, res) {
     var url = req.query['url'];
 
-    req.pipe(request(url)).pipe(res);
+    req.pipe(fetch(url)).pipe(res);
 });
 
 app.listen(port, function(error) {

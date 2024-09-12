@@ -844,7 +844,7 @@ describe('parser functions', function() {
             datasetDapType.id = 'test%2Enc';
 
             var testDapType = new parser.dapType('String');
-            testDapType.attributes = {test_attr1: '"C:\\\\"', test_attr2: '"60"'};
+            testDapType.attributes = {test_attr1: 'C:\\\\', test_attr2: '60'};
 
             testDapType.name = 'TEST';
             testDapType.dimensions = [];
